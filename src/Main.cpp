@@ -1,9 +1,3 @@
-/*
- * Main.cp
- *
- *  Created on: Mar 32, 1920
- *      Author: snopp
- */
 
 #include <triangulation.h>
 #include <GL/glut.h>
@@ -17,20 +11,33 @@ using namespace std;
 int width = 800;
 int height = 600;
 
-void readPointsFromFile(string filename) {
-
+void parsePoints(string filename,
+                 vector<int> *x, 
+                 vector<int> *y, 
+                 vector<int> *z,
+                 int &n) {
+    n = 0;
+    string temp;
+    int xtemp, ytemp, ztemp;
     ifstream infile;
     infile.open(filename.c_str());
     if (infile.is_open()) {
         while (!infile.eof()) {
-            string line;
-            getline(infile, line);
-            cout << line << endl;
+            infile >> temp;
+            if (infile.eof()) break;
+            infile >> xtemp;
+            infile >> ytemp;
+            infile >> ztemp;
+            x->push_back(xtemp);
+            y->push_back(ytemp);
+            z->push_back(ztemp);
+            n++;
+            //cout << xtemp << " " << ytemp << " " << ztemp << endl;
         }
     } else {
         cout << filename << " could not be opened" << endl;
     }
-    infile.close();
+    infile.close();   
 }
 
 void initGL() {
@@ -63,6 +70,17 @@ void reshape(int x, int y) {
 
 int main(int argc, char **argv)
 {
+
+    vector<int> x;
+    vector<int> y;
+    vector<int> z;
+    int n;
+    parsePoints("../data/200.data", &x, &y, &z, n);
+    cout << "Parsing complete, found " << n << " points" << endl;
+
+    char *g;
+    copyCoordinatesToGraph(n, &x[0], &y[0], &z[0], 1, &g);
+
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
     glutInitWindowSize(width, height);
@@ -71,9 +89,6 @@ int main(int argc, char **argv)
     glutReshapeFunc(reshape);
     glutDisplayFunc(display);
     glutIdleFunc(display);
-
-    readPointsFromFile("200.data");
-
 
     glutMainLoop();
     return 0;
