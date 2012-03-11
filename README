@@ -1,0 +1,2 @@
+command of doom:
+mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=DEBUG -DCMAKE_INSTALL_PREFIX=.. .. && make install
