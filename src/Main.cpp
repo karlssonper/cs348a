@@ -1,5 +1,8 @@
+typedef int indexType;
+typedef int coordType;
 
-#include <triangulation.h>
+//#include <triangulation.h>
+#include <graph.h>
 #include <GL/glut.h>
 #include <vector>
 #include <string>
@@ -39,6 +42,20 @@ void parsePoints(string filename,
     }
     infile.close();   
 }
+
+void copyCoordinatesToGraph(int nofSites,
+                            int *x,
+                            int *y,
+                            int *z,
+                            int eliminateDuplicates,
+                            char **gExternal) {
+    graphType *g;
+    *gExternal = (char*)newGraph();
+    g = (graphType*)*gExternal;
+    
+
+}
+
 
 void initGL() {
     glClearColor(0.2f, 0.2f, 0.2f, 1.f);
