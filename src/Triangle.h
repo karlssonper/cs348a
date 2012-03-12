@@ -8,7 +8,7 @@ class IntersectionInfo;
  
 class Triangle {
 public:
-    Triangle(Vector3 _v1, Vector3 _v2, Vector3 _v3, Vector3 _n);
+    Triangle(Vector3 _v1, Vector3 _v2, Vector3 _v3);
     IntersectionInfo rayIntersect(Ray _ray);
     Vector3 v1, v2, v3, n;
 };

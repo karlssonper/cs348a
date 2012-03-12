@@ -12,6 +12,9 @@ extern "C" {
 #include <fstream>
 #include <math.h>
 #include "Camera.h"
+#include "Triangle.h"
+#include "IntersectionInfo.h"
+#include "Ray.h"
 
 using namespace std;
 
