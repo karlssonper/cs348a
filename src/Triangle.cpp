@@ -51,7 +51,7 @@ IntersectionInfo Triangle::rayIntersect(Ray _ray) {
     
     // hit!
     return IntersectionInfo( t,
-                             Point3(_ray.e+_ray.d*t),
+                             Vector3(_ray.e+_ray.d*t),
                              true );
 
 }
