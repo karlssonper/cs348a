@@ -5,7 +5,7 @@ PROJECT (CS348a_minmaxer)
 INCLUDE_DIRECTORIES(source.triangulation
                     source.minmaxer)
                     
-ADD_LIBRARY(minmaxer source.triangulation/angle
+ADD_LIBRARY(minmaxer SHARED source.triangulation/angle
                      source.triangulation/angle.sos
                      source.triangulation/bitvector
                      source.triangulation/delaunay

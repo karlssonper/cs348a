@@ -4,7 +4,7 @@ PROJECT (CS348a_src)
 
 INCLUDE_DIRECTORIES(../minmaxer/source.triangulation)
 
-LINK_DIRECTORIES(../lib)
+LINK_DIRECTORIES(/home/per/Dev/cs348a/project.git/lib)
 
 ADD_EXECUTABLE(main Main)
 

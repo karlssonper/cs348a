@@ -1,5 +1,6 @@
-
-#include <triangulation.h>
+extern "C" {
+    #include <triangulation.h>
+}
 #include <GL/glut.h>
 #include <vector>
 #include <string>

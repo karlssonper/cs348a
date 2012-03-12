@@ -7,4 +7,6 @@ typedef struct {
   int maxTriangles; /* size of v */
 } triangleList;
 
-extern int GLOBAL_INTERRUPT_ALGORITHM;
+extern void copyCoordinatesToGraph (int nofSites, int* x, int* y, int* z,
+        int eliminateDuplicates, char **gExternal);
+extern void copyGraphToListOfTriangles (char *gExternal, triangleList ** tl);

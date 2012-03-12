@@ -10,6 +10,8 @@
 #include "graph.h"
 #include "triangulation.h"
 
+int GLOBAL_INTERRUPT_ALGORITHM;
+
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 /* external interfaces for triangulation algs */
