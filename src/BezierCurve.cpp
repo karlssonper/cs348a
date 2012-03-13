@@ -78,3 +78,22 @@ void BezierCurve::renderCtrlPolyExt(const std::vector<Vector3> &_cpts,
 	glEnd();
 }
 
+void BezierCurve::renderCtrlPolyFill(const std::vector<Vector3> &_cpts){
+	
+	glEnable (GL_BLEND);
+	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glColor4f(1.0f, 0.4f, 0.4f, 0.6f);
+	glBegin(GL_TRIANGLES);
+	for (int i=0; i<_cpts.size()-2; i=i+2) {
+        Vector3 p1 = _cpts.at(i);
+        Vector3 p2 = _cpts.at(i+1);
+        Vector3 p3 = _cpts.at(i+2);
+        glVertex3f(p1.x, p1.y, p1.z);
+        glVertex3f(p2.x, p2.y, p2.z);
+		glVertex3f(p3.x, p3.y, p3.z);
+    }
+    glEnd();
+	
+
+
+}
