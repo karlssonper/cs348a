@@ -189,6 +189,14 @@ void printInfo()
 {
     std::cout << std::endl <<
          "  ---------------------------------------------------------\n"
+         "  |      ___     ___     ____   _ _      ___              |\n"
+         "  |     / __|   / __|   |__ /  | | |    ( _ )   __ _      |\n"
+         "  |    | (__    \\__ \\    |_ \\  |_  _|   / _ \\  / _` |     |\n"
+         "  |     \\___|   |___/   |___/   _|_|_   \\___/  \\__,_|     |\n"
+         "  |   _|\"\"\"\"\"|_|\"\"\"\"\"|_|\"\"\"\"\"|_|\"\"\"\"\"|_|\"\"\"\"\"|_|\"\"\"\"\"|    |\n"
+         "  |    \'-0-0-\'\"\'-0-0-\'\"\'-0-0-\'\"\'-0-0-\'\"\'-0-0-\'\"\'-0-0-\"    |\n"
+         "  |         (yes, that is a train. Let's go train!        |\n"
+         "  |                                                       |\n"
          "  | Stanford cs348a - Geometric Modeling                  |\n"
          "  |                  Final Project                        |\n"
          "  |       by Per Karlsson  - perk@stanford.edu            |\n"
@@ -299,7 +307,7 @@ int main(int argc, char **argv)
 
     terrain = new Terrain("../src/sample.mesh3","../src/sample.triangles3");
     printf("terrain loaded\n");
-    tour.resize(3);
+    tour.resize(9);
     sightPath = new SightPath(terrain, tour);
     printf("sight path loaded\n");
     sightPath->createConstraintTangents();

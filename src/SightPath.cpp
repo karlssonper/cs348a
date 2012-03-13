@@ -70,6 +70,27 @@ std::vector<Vector3> SightPath::sights() const
 
 void SightPath::solve (Sight sight0, Sight sight1)
 {
+    Vector3 cp0 = sight0.pos, cp1 = sight1.pos, mp;
+    bool ok = true;
+    do {
+        cp0 = cp0 + sight0.tangent *  CP_SCALE;
+        cp1 = cp1 + sight1.tangent * -CP_SCALE;
+        mp = (cp0+cp1)/2.f;
+        ok = intersection(sight0.pos,mp) ||
+             intersection(cp0,mp) ||
+             intersection(mp,sight1.pos) ||
+             intersection(mp,cp1);
+    } while (ok);
+
+    controlPoints_.push_back(sight0.pos);
+    controlPoints_.push_back(cp0);
+    controlPoints_.push_back(mp);
+    controlPoints_.push_back(cp1);
+}
+
+/*
+void SightPath::solve (Sight sight0, Sight sight1)
+{
     Vector3 cp0;
     bool hit = true;
     float scale = 1.f;
@@ -117,7 +138,7 @@ void SightPath::solve (Sight sight0, Sight sight1)
     printf("Point %f %f %f\n", cp1.x, cp1.y, cp1.z);
 
     std::cout << "4 new Control points added!" << std::endl;
-}
+}*/
 
 Vector3 SightPath::lineIntersect(Vector3 v0,
                                           Vector3 v1,
