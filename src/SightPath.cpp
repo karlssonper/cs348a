@@ -103,6 +103,8 @@ void SightPath::solve (Sight sight0, Sight sight1)
     controlPoints_.push_back(cp0);
     controlPoints_.push_back(mp);
     controlPoints_.push_back(cp1);
+
+    std::cout << "4 new Control points added!" << std::endl;
 }
 
 Vector3 SightPath::lineIntersect(Vector3 v0,
