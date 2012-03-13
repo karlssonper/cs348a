@@ -11,8 +11,8 @@
 #include <vector>
 #include "MathEngine.h"
 
-#define CP0_ITER 1.0f
-#define D 100.f
+#define CP0_ITER 600.0f
+#define D 200.f
 class Terrain;
 class SightPath
 {

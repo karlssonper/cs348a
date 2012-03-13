@@ -10,6 +10,7 @@
 #include "IntersectionInfo.h"
 #include "terrain.h"
 #include <limits>
+#include <stdio.h>
 
 SightPath::SightPath(const Terrain * terrain,
           const std::vector<Vector3> &sights) : terrain_(terrain)
@@ -25,11 +26,9 @@ Vector3 SightPath::tangent(Vector3 p0, Vector3 p1)
 {
     Vector3 dir = p1 - p0;
 #define PI 3.14159265
-    float phi = atan2(dir.y, dir.x)* 180 / PI;
-    float theta = 135;
+    float phi = atan2(dir.y, dir.x);
+    float theta = 135 *PI/180.0;
     Vector3 t(cos(phi)*sin(theta), sin(phi)*sin(theta), cos(theta));
-    if (t.mag() == 0.0f) std::cerr << "Error tangents!!";
-    t = t/t.mag();
     return t;
 }
 
@@ -76,11 +75,13 @@ void SightPath::solve (Sight sight0, Sight sight1)
     float scale = 1.f;
     do {
         cp0 = sight0.pos + sight0.tangent * CP0_ITER/scale;
+        Vector3 test = sight0.tangent * CP0_ITER/scale;
+        std::cout << "cp0 pos: " << test.x << " " << test.y << " " << test.z << std::endl;
         scale *= 2.f;
         hit = intersection(sight0.pos,cp0);
     } while (hit);
 
-    std::cout << "First hit done" << std::endl;
+    //std::cout << "First hit done" << std::endl;
 
     Vector3 mp = (cp0 + sight1.pos)/2.0f;
     Vector3 u = cp0 - sight1.pos;
@@ -91,12 +92,11 @@ void SightPath::solve (Sight sight0, Sight sight1)
     do {
         mp = mp + mp_dir;
         //std::cout << "Before first intersection hit done" << std::endl;
-        //std::cout << "cp0 pos: " << cp0.x << " " << cp0.y << " " << cp0.z << std::endl;
         //std::cout << "mp pos: " << mp.x << " " << mp.y << " " << mp.z << std::endl;
 
         hit = intersection(cp0,mp);
     } while (hit);
-    std::cout << "Second hit done" << std::endl;
+    //std::cout << "Second hit done" << std::endl;
 
     Vector3 v0 = cp0;
     Vector3 v1 = mp-cp0;
@@ -110,6 +110,10 @@ void SightPath::solve (Sight sight0, Sight sight1)
     controlPoints_.push_back(cp0);
     controlPoints_.push_back(mp);
     controlPoints_.push_back(cp1);
+    printf("Point %f %f %f\n", sight0.pos.x, sight0.pos.y, sight0.pos.z);
+    printf("Point %f %f %f\n", cp0.x, cp0.y, cp0.z);
+    printf("Point %f %f %f\n", mp.x, mp.y, mp.z);
+    printf("Point %f %f %f\n", cp1.x, cp1.y, cp1.z);
 
     std::cout << "4 new Control points added!" << std::endl;
 }
@@ -128,10 +132,15 @@ Vector3 SightPath::lineIntersect(Vector3 v0,
 bool SightPath::intersection(const Vector3 & source, const Vector3 &dest)
 {
     std::vector<Triangle> triangles = terrain_->getTriangles(source,dest);
-    Ray r(source,dest-source,0, std::numeric_limits<float>::max());
+    Vector3 dir = dest-source;
+    Ray r(source,dir,0, std::numeric_limits<float>::max());
     for (int i = 0; i < triangles.size(); ++i) {
         IntersectionInfo ii = triangles[i].rayIntersect(r);
-        if (ii.hit) return true;
+        if (ii.t > dir.mag()) {
+            std::cout << "t" <<  ii.t << std::endl;
+            return true;
+
+        }
     }
     return false;
 }

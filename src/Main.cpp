@@ -38,6 +38,9 @@ int mouseX, mouseY;
 Terrain *terrain;
 SightPath * sightPath;
 
+bool bDrawTerrain = true;
+bool bDrawTours = true;
+
 void reshape(int x, int y);
 
 void drawTriangles()
@@ -118,7 +121,7 @@ void display() {
     camera->lookThrough();
        
     glDisable(GL_LIGHTING);
-    glBegin(GL_LINES);
+    /*glBegin(GL_LINES);
         glColor3f(1.f, 0.f, 0.f);
         glVertex3f(0.f, 0.f, 0.f);
         glVertex3d(100000.f, 0.f, 0.f);
@@ -128,16 +131,19 @@ void display() {
         glColor3f(0.f, 0.f, 1.f);
         glVertex3f(0.f, 0.f, 0.f);
         glVertex3d(0.f, 0.f, 100000.f);
-    glEnd();
+    glEnd();*/
     glEnable(GL_LIGHTING);
 
     GLfloat lightPos[] = { 0.0, -1.0, 1.0, 0.0 };
     glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
 
-    drawTriangles();
+
+    if(bDrawTerrain)
+        drawTriangles();
     glDisable(GL_LIGHTING);
-    drawTour(&tour);
-    BezierCurve::renderCurves(controlPoints,1000);
+    if (bDrawTours)
+        drawTour(&tour);
+    BezierCurve::renderCurves(controlPoints,5000);
     drawMinimap();
     glEnable(GL_LIGHTING);
 
@@ -154,11 +160,17 @@ void reshape(int x, int y) {
 
 void keyPressed (unsigned char key, int x, int y) {  
     switch (key) {
+    case '1':
+        bDrawTerrain = !bDrawTerrain;
+        break;
+    case '2':
+        bDrawTours = !bDrawTours;
+        break;
     case 'w':
-        camera->walkForward(100.f);
+        camera->walkForward(1000.f);
         break;
     case 's':
-        camera->walkBackwards(100.f);
+        camera->walkBackwards(1000.f);
         break;
     case 'a':
         camera->strafeLeft(100.f);
@@ -199,6 +211,7 @@ int main(int argc, char **argv)
 
     terrain = new Terrain("../src/sample.mesh3","../src/sample.triangles3");
     printf("terrain loaded\n");
+    tour.resize(3);
     sightPath = new SightPath(terrain, tour);
     printf("sight path loaded\n");
     sightPath->createConstraintTangents();
