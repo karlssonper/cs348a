@@ -76,20 +76,27 @@ void SightPath::solve (Sight sight0, Sight sight1)
     float scale = 1.f;
     do {
         cp0 = sight0.pos + sight0.tangent * CP0_ITER/scale;
-        scale /= 2.f;
+        scale *= 2.f;
         hit = intersection(sight0.pos,cp0);
     } while (hit);
+
+    std::cout << "First hit done" << std::endl;
 
     Vector3 mp = (cp0 + sight1.pos)/2.0f;
     Vector3 u = cp0 - sight1.pos;
     u = u/u.mag();
-    Vector3 mp_dir = sight1.tangent - (u*u.dot(sight1.tangent));
+    Vector3 mp_dir = sight1.tangent*-1.f - (u*u.dot(sight1.tangent*-1.f));
     mp_dir = mp_dir / mp_dir.mag();
     hit = true;
     do {
         mp = mp + mp_dir;
+        //std::cout << "Before first intersection hit done" << std::endl;
+        //std::cout << "cp0 pos: " << cp0.x << " " << cp0.y << " " << cp0.z << std::endl;
+        //std::cout << "mp pos: " << mp.x << " " << mp.y << " " << mp.z << std::endl;
+
         hit = intersection(cp0,mp);
     } while (hit);
+    std::cout << "Second hit done" << std::endl;
 
     Vector3 v0 = cp0;
     Vector3 v1 = mp-cp0;
