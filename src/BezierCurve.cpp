@@ -20,6 +20,7 @@ void BezierCurve::renderCurve(const Vector3 &_p1,
                               const Vector3 &_p3,
                               int _steps,
 							  float _lineWidth) {
+    glEnable(GL_POINT_SIZE);
     glBegin(GL_POINTS);
     for (int i=0; i<_steps; ++i) {
         float t = (float)i/(float)_steps;

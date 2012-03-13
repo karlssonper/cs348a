@@ -40,6 +40,9 @@ SightPath * sightPath;
 
 bool bDrawTerrain = true;
 bool bDrawTours = true;
+bool bDrawCurve = true;
+bool bDrawControlPoints = true;
+bool bDrawControlPolygon = false;
 
 void reshape(int x, int y);
 
@@ -143,7 +146,16 @@ void display() {
     glDisable(GL_LIGHTING);
     if (bDrawTours)
         drawTour(&tour);
-    BezierCurve::renderCurves(controlPoints,5000);
+
+    if(bDrawCurve)
+        BezierCurve::renderCurves(controlPoints,5000,3);
+
+    if (bDrawControlPoints)
+        BezierCurve::renderCtrlPts(controlPoints, 60);
+
+    if (bDrawControlPolygon)
+        BezierCurve::renderCtrlPoly(controlPoints,3);
+
     drawMinimap();
     glEnable(GL_LIGHTING);
 
@@ -158,6 +170,31 @@ void reshape(int x, int y) {
     glMatrixMode(GL_MODELVIEW);
 }
 
+void printInfo()
+{
+    std::cout << std::endl <<
+         "  ---------------------------------------------------------\n"
+         "  | Stanford cs348a - Geometric Modeling                  |\n"
+         "  |                  Final Project                        |\n"
+         "  |       by Per Karlsson  - perk@stanford.edu            |\n"
+         "  |          Victor Sand   - vsand@stanford.edu           |\n"
+         "  |          Steven Lesser - sklesser@stanford.edu        |\n"
+         "  |                                                       |\n"
+         "  |    Mouse       - Rotate Camera view                   |\n"
+         "  |    Press 'w/s' - Walk forward/backwards               |\n"
+         "  |    Press 'a/d' - Strafe left/right                    |\n"
+         "  |                                                       |\n"
+         "  |    Press '1' - Toggle Terrain                         |\n"
+         "  |    Press '2' - Toggle Sights                          |\n"
+         "  |    Press '3' - Toggle Sight Path                      |\n"
+         "  |    Press '4' - Toggle Control Points                  |\n"
+         "  |    Press '5' - Toggle Control Polygon                 |\n"
+         "  |                                                       |\n"
+         "  |    Press 'esc' - Quit                                 |\n"
+         "  ---------------------------------------------------------"
+        << std::endl;
+}
+
 void keyPressed (unsigned char key, int x, int y) {  
     switch (key) {
     case '1':
@@ -165,6 +202,16 @@ void keyPressed (unsigned char key, int x, int y) {
         break;
     case '2':
         bDrawTours = !bDrawTours;
+        break;
+
+    case '3':
+        bDrawCurve = !bDrawCurve;
+        break;
+    case '4':
+        bDrawControlPoints = !bDrawControlPoints;
+        break;
+    case '5':
+        bDrawControlPolygon = !bDrawControlPolygon;
         break;
     case 'w':
         camera->walkForward(1000.f);
@@ -232,7 +279,7 @@ int main(int argc, char **argv)
     glutKeyboardFunc(keyPressed);
     glutMotionFunc(mouseFunc);
     glutPassiveMotionFunc(mouseMoveFunc);
-
+    printInfo();
     glutMainLoop();
     return 0;
 }
