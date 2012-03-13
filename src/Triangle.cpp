@@ -27,7 +27,7 @@ IntersectionInfo Triangle::rayIntersect(Ray _ray) {
     float l = v1.z - _ray.e.z;
     float M = a*(e*i-h*f)+b*(g*f-d*i)+c*(d*h-e*g);
     float t = (-1.f)*(f*(a*k-j*b)+e*(j*c-a*l)+d*(b*l-k*c))/M;
-    if ( t<_ray.tMin || t>_ray.tMax ) {
+    if ( t < _ray.tMin || t >_ray.tMax ) {
 
         // miss!
         return IntersectionInfo( 0.f,

@@ -51,6 +51,7 @@ void drawBezier() {
 
 
     BezierCurve::renderCurves(controlPoints, 1000);
+    BezierCurve::renderCtrlPts(controlPoints, 0.2);
 
     
 }
