@@ -46,7 +46,7 @@ void initGL() {
 void drawBezier() {
 
 
-    //BezierCurve::renderCurves(controlPoints, 1000);
+    BezierCurve::renderCurves(controlPoints, 1000);
 
     
 }
