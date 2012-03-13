@@ -37,10 +37,13 @@ public:
 
     void lookThrough() {
         glLoadIdentity();
-        glRotatef(-90.f, 1.f, 0.f, 0.f);
+	gluLookAt(posX,posY,posZ,
+		  posX+1,posY+1,posZ-1,
+		  0,0,1);
+        /*glRotatef(-90.f, 1.f, 0.f, 0.f);
         glRotatef(pitch, 1.f, 0.f, 0.f);
         glRotatef(yaw, 0.f, 0.f, 1.f);
-        glTranslatef(posX, posY, posZ);
+        glTranslatef(posX, posY, posZ);*/
     }
 
     float posX, posY, posZ;

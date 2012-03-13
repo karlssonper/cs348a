@@ -8,7 +8,7 @@ Triangle::Triangle(Vector3 _v1, Vector3 _v2, Vector3 _v3)
     n = nTemp.normalize();
 }
 
-Triangle::Triangle(const Triangle &t)
+Triangle::Triangle(const Triangle &_t)
     : v1(_t.v1), v2(_t.v2), v3(_t.v3), n(_t.n) {}
 
 IntersectionInfo Triangle::rayIntersect(Ray _ray) {

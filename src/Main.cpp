@@ -12,6 +12,7 @@ extern "C" {
 #include <fstream>
 #include <math.h>
 #include "Camera.h"
+#include "terrain.h"
 
 using namespace std;
 
@@ -27,7 +28,9 @@ char *g;
 int n, tn;
 Camera* camera;
 
-void calculateNormal(float x1,  float y1,  float z1,
+Terrain *terrain;
+
+/*void calculateNormal(float x1,  float y1,  float z1,
                      float x2,  float y2,  float z2, 
                      float x3,  float y3,  float z3,
                      float *nx, float *ny, float *nz) {
@@ -45,7 +48,7 @@ void calculateNormal(float x1,  float y1,  float z1,
     *nx = nxx / norm;
     *ny = nyy / norm;
     *nz = nzz / norm;
-}
+    }*/
 
 void drawTriangles(triangleList *tl,
                    int *x,
@@ -54,7 +57,7 @@ void drawTriangles(triangleList *tl,
 
     glColor3f(1.f, 1.f, 1.f);
 
-    for (int i=0; i<tl->nofTriangles; ++i) {
+    /*    for (int i=0; i<tl->nofTriangles; ++i) {
         glBegin(GL_TRIANGLES);
         float nx, ny, nz;
         calculateNormal(x[tl->v[i][0]], y[tl->v[i][0]], z[tl->v[i][0]],
@@ -66,7 +69,8 @@ void drawTriangles(triangleList *tl,
         glVertex3f(x[tl->v[i][1]], y[tl->v[i][1]], z[tl->v[i][1]]);
         glVertex3f(x[tl->v[i][2]], y[tl->v[i][2]], z[tl->v[i][2]]);
         glEnd();
-    }
+	}*/
+    terrain->renderTriangles();
 }
 
 void drawTour(vector<float> *tour) {
@@ -139,7 +143,7 @@ void initGL() {
     glViewport(0, 0, width, height);
     gluPerspective(60.f, width/height, 0.1f, 100000.f);
     glMatrixMode(GL_MODELVIEW);
-    camera = new Camera(0.f, 0.f, 0.f, 0.f, 0.f);
+    camera = new Camera(0.0f, 0.0f, 800.f, 0.f, 0.f);
 }
     
 void display() {
@@ -147,7 +151,7 @@ void display() {
 
     glLoadIdentity();
     
-    glRotatef(-90.f, 1.f, 0.f, 0.f);
+    //glRotatef(180.f, 1.f, 0.f, 0.f);
     
     camera->lookThrough();
     
@@ -169,14 +173,15 @@ void display() {
     GLfloat lightPos[] = { 0.0, -1.0, 1.0, 0.0 };
     glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
 
+    //drawTerrain();
     drawTriangles(tl, &x[0], &y[0], &z[0]);
 
     glDisable(GL_LIGHTING);
     drawTour(&tour);
     glEnable(GL_LIGHTING);
 
-    glFlush();
-    glutPostRedisplay();
+    //glFlush();
+    //glutPostRedisplay();
     glutSwapBuffers();
 }
 
@@ -220,7 +225,7 @@ void keyPressed (unsigned char key, int x, int y) {
 int main(int argc, char **argv)
 {
 
-    parsePoints("../data/hw4.heights", &x, &y, &z, n);
+  /*parsePoints("../data/hw4.heights", &x, &y, &z, n);
     cout << "Parsed points, found " << n << " points" << endl;
     copyCoordinatesToGraph(n, &x[0], &y[0], &z[0], 1, &g);
     planeSweep(g);
@@ -228,8 +233,10 @@ int main(int argc, char **argv)
     copyGraphToListOfTriangles(g, &tl);
 
     parseTour("../data/hw4.tour", &tour);
-    cout << "Parsed tour, found " << tour.size()/3 << " sights" << endl;
+    cout << "Parsed tour, found " << tour.size()/3 << " sights" << endl;*/
 
+    terrain = new Terrain("../src/sample.mesh","../src/sample.triangles");
+    terrain->print();
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
     glutInitWindowSize(width, height);
