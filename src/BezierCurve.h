@@ -10,6 +10,8 @@ public:
                             const Vector3 &_p2, 
                             const Vector3 &_p3,
                             float _t);
+	static Vector3 evaluateGlobal(const std::vector<Vector3> &_cpts,
+								  float _t);
     static void renderCurve(const Vector3 &_p1,
                             const Vector3 &_p2,
                             const Vector3 &_p3,

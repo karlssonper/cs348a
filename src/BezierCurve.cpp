@@ -15,6 +15,36 @@ Vector3 BezierCurve::evaluate(const Vector3 &_p1,
     return _p1*(1.f-_t)*(1.f-_t) + _p2*2.f*_t*(1.f-_t) + _p3*_t*_t;
 }
 
+Vector3 BezierCurve::evaluateGlobal(const std::vector<Vector3> &_cpts,
+								    float _t) {
+										
+	// figure out how many distinct curves we have
+	int nrCurves = (_cpts.size()-1)/2;
+	
+	// figure out how much of [0,1] each curve represents
+	float localInterval = 1.f / (float)nrCurves;
+	
+	// figure out which local control polygon we are in
+	int localPolygon = floor(_t / localInterval);
+	
+	// roundoff issues towards the end (just return last possible point)
+	if (2*localPolygon+2 > _cpts.size()-1) {
+		Vector3 p1 = _cpts.at(_cpts.size()-3);
+		Vector3 p2 = _cpts.at(_cpts.size()-2);
+		Vector3 p3 = _cpts.at(_cpts.size()-1);
+		return evaluate(p1, p2, p3, 1.f);
+	}
+	
+	// choose the three control points for the local polygon
+	Vector3 p1 = _cpts.at(2*localPolygon);
+	Vector3 p2 = _cpts.at(2*localPolygon+1);
+	Vector3 p3 = _cpts.at(2*localPolygon+2);
+	
+	// translate the global interval to [0,1] locally and evaluate
+	float tLocal = (_t-localInterval*localPolygon)/localInterval;
+	return evaluate(p1, p2, p3, tLocal);									
+}
+
 void BezierCurve::renderCurve(const Vector3 &_p1,
                               const Vector3 &_p2,
                               const Vector3 &_p3,
@@ -48,7 +78,7 @@ void BezierCurve::renderCtrlPts(const std::vector<Vector3> &_cpts,
 	for (int i=0; i<_cpts.size(); i++) {
 		glPushMatrix();
 		glTranslatef(_cpts.at(i).x, _cpts.at(i).y, _cpts.at(i).z);
-		glutSolidSphere(_size, 30, 30);
+		glutSolidCube(_size);
 		glPopMatrix();
 	}
 }

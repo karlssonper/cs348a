@@ -37,6 +37,9 @@ float cameraInc = 0.05;
 Vector3 cameraPos = p1;
 Vector3 cameraDir = p2;
 
+float tTour = 0.f;
+Vector3 tourPos = p0;
+
 void initGL() {
     glClearColor(0.2f, 0.2f, 0.2f, 1.f);
     glEnable(GL_DEPTH_TEST);
@@ -58,6 +61,20 @@ void drawBezier() {
 void updateCamera() {
     cameraPos = BezierCurve::evaluate(p1, p2, p3, cameraT);
     cameraDir = BezierCurve::evaluate(p1, p2, p3, cameraT+cameraInc);
+}
+
+void updateTour(float inc) {
+	tTour += inc;
+	if (tTour >= 1.f) tTour = 0.f;
+	tourPos = BezierCurve::evaluateGlobal(controlPoints, tTour);
+}
+
+void drawTour() {
+	glPushMatrix();
+	glTranslatef(tourPos.x, tourPos.y, tourPos.z);
+	glColor3f(0.f, 0.f, 0.f);
+	glutSolidCube(0.4);
+	glPopMatrix();
 }
     
 void display() {
@@ -91,6 +108,7 @@ void display() {
     
 
     drawBezier();
+    drawTour();
 
     glFlush();
     glutPostRedisplay();
@@ -108,8 +126,7 @@ void reshape(int x, int y) {
 void keyPressed (unsigned char key, int x, int y) {  
     switch (key) {
     case 'w':
-        cameraT += cameraInc;
-        updateCamera();
+        updateTour(0.01);
         glutPostRedisplay();
         glutSwapBuffers();
         break;
