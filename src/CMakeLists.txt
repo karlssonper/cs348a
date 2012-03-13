@@ -6,7 +6,7 @@ INCLUDE_DIRECTORIES(../minmaxer/source.triangulation)
 
 LINK_DIRECTORIES(/home/per/Dev/cs348a/project.git/lib)
 
-ADD_EXECUTABLE(main Main)
+ADD_EXECUTABLE(main Triangle IntersectionInfo Ray terrain Main)
 
 TARGET_LINK_LIBRARIES(main GL GLU glut minmaxer)
 
