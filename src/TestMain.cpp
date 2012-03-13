@@ -25,10 +25,10 @@ Vector3 p1(-8, -8, 10);
 Vector3 p2(-7, -7, 7);
 Vector3 p3(-6, -6, 5);
 Vector3 p4(-5, -5, 7);
-Vector3 p5(-5, 0, -2);
-Vector3 p6(0, 0, 1);
+Vector3 p5(-4, -4, 3);
+Vector3 p6(0, 0, 5);
 Vector3 p7(3, 3, 3);
-Vector3 p8(-4,-4,-4);
+Vector3 p8(7,7,10);
 
 vector<Vector3> controlPoints;
 
@@ -53,6 +53,7 @@ void drawBezier() {
     BezierCurve::renderCurves(controlPoints, 1000, 3.f);
     BezierCurve::renderCtrlPts(controlPoints, 0.2);
     BezierCurve::renderCtrlPoly(controlPoints, 3.f);
+    BezierCurve::renderCtrlPolyExt(controlPoints, 2.f);
 
     
 }
