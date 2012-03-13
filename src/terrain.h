@@ -6,12 +6,10 @@
 #include "MathEngine.h"
 #include "Triangle.h"
 
-
 class Point
 {
  public:
   Point(int _x=0, int _y=0, int _z=0);
-
   int x;
   int y;
   int z;
@@ -22,7 +20,6 @@ class Terrain
  public:
   Terrain(char* fileVertices, char* fileTriangles);
 
-  void constructGrid(int rows, int cols);
   void renderTriangles();
   void print();
   void getBounds(float *minx, float *maxx, 
@@ -33,13 +30,20 @@ class Terrain
   std::vector<Vector3> points;
   std::vector<Point> triangles;
   std::vector<Vector3> normals;
+  std::vector<float> heights;
   std::vector<std::vector<int> > grid;
 
  private:
   void ReadTerrain (char* fileName);
   void ReadTriangles(char* fileName);
+<<<<<<< HEAD
+  Point getGrid(Vector3 val);
+  void constructGrid(int rows, int cols);
+=======
   Point getGrid(Vector3 val) const;
+>>>>>>> 25bbc7816e83b1c2d6628e279d5fe741b510d113
   void CreateNormals();
+  void CreateColors();
 
   bool boundsFound;
   Vector3 minBound;

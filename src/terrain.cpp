@@ -20,6 +20,7 @@ Terrain::Terrain(char* fileVertices, char* fileTriangles)
   getBounds(&scratch,&scratch,
 	    &scratch,&scratch,&scratch,&scratch);
   constructGrid(16,16);
+  CreateColors();
 }
 
 Point Terrain::getGrid(Vector3 val) const
@@ -274,5 +275,20 @@ void Terrain::CreateNormals()
 		      z.x, z.y, z.z,
 		      &nx, &ny, &nz);
       normals.push_back(Vector3(nx,ny,nz));
+    }
+}
+
+// taken from http://www.lighthouse3d.com/tutorials/glsl-tutorial/setup-for-glsl-example/
+void Terrain::CreateColors()
+{
+  float minZ = minBound.z;
+  float maxZ = maxBound.z;
+  float range = maxZ - minZ;
+  float scale;
+  for (unsigned int i = 0; i < points.size(); i++)
+    {
+      Vector3 v = points[i];
+      scale = (v.z-minZ) / range;
+      heights.push_back(scale);
     }
 }

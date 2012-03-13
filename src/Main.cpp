@@ -34,46 +34,12 @@ int mouseX, mouseY;
 Terrain *terrain;
 SightPath * sightPath;
 
-/*void calculateNormal(float x1,  float y1,  float z1,
-                     float x2,  float y2,  float z2, 
-                     float x3,  float y3,  float z3,
-                     float *nx, float *ny, float *nz) {
-    float Qx,Qy,Qz,Px,Py,Pz, nxx, nyy, nzz, norm;
-    Qx = x2-x1;
-    Qy = y2-y1;
-    Qz = z2-z1;
-    Px = x3-x2;
-    Py = y3-y2;
-    Pz = z3-z2;
-    nxx = Qy*Pz - Qz*Py;
-    nyy = -Qx*Pz + Qz*Px;
-    nzz = Qx*Py - Px*Qy;
-    norm = sqrt(nxx*nxx+nyy*nyy+nzz*nzz);
-    *nx = nxx / norm;
-    *ny = nyy / norm;
-    *nz = nzz / norm;
-    }*/
-
 void drawTriangles(triangleList *tl,
                    int *x,
                    int *y,
                    int *z) {
 
     glColor3f(1.f, 1.f, 1.f);
-
-    /*    for (int i=0; i<tl->nofTriangles; ++i) {
-        glBegin(GL_TRIANGLES);
-        float nx, ny, nz;
-        calculateNormal(x[tl->v[i][0]], y[tl->v[i][0]], z[tl->v[i][0]],
-                        x[tl->v[i][1]], y[tl->v[i][1]], z[tl->v[i][1]],
-                        x[tl->v[i][2]], y[tl->v[i][2]], z[tl->v[i][2]],
-                        &nx, &ny, &nz);
-        glNormal3f(nx,ny,nz);
-        glVertex3f(x[tl->v[i][0]], y[tl->v[i][0]], z[tl->v[i][0]]);
-        glVertex3f(x[tl->v[i][1]], y[tl->v[i][1]], z[tl->v[i][1]]);
-        glVertex3f(x[tl->v[i][2]], y[tl->v[i][2]], z[tl->v[i][2]]);
-        glEnd();
-	}*/
     terrain->renderTriangles();
 }
 
@@ -87,34 +53,6 @@ void drawTour(vector<Vector3> *tour) {
     }
 }
 
-void parsePoints(string filename,
-                 vector<int> *x, 
-                 vector<int> *y, 
-                 vector<int> *z,
-                 int &n) {
-    n = 0;
-    string temp;
-    int xtemp, ytemp, ztemp;
-    ifstream infile;
-    infile.open(filename.c_str());
-    if (infile.is_open()) {
-        while (!infile.eof()) {
-            infile >> temp;
-            if (infile.eof()) break;
-            infile >> xtemp;
-            infile >> ytemp;
-            infile >> ztemp;
-            x->push_back(xtemp);
-            y->push_back(ytemp);
-            z->push_back(ztemp);
-            n++;
-            cout << xtemp << " " << ytemp << " " << ztemp << endl;
-        }
-    } else {
-        cout << filename << " could not be opened" << endl;
-    }
-    infile.close();   
-}
 
 void parseTour(string filename,
                vector<Vector3> *tour) {
@@ -154,8 +92,7 @@ void display() {
     glLoadIdentity();
     
     camera->lookThrough();
-    
-   
+       
     glDisable(GL_LIGHTING);
     glBegin(GL_LINES);
         glColor3f(1.f, 0.f, 0.f);
@@ -173,15 +110,12 @@ void display() {
     GLfloat lightPos[] = { 0.0, -1.0, 1.0, 0.0 };
     glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
 
-    //drawTerrain();
     drawTriangles(tl, &x[0], &y[0], &z[0]);
 
     glDisable(GL_LIGHTING);
     drawTour(&tour);
     glEnable(GL_LIGHTING);
 
-    //glFlush();
-    //glutPostRedisplay();
     glutSwapBuffers();
 }
 
