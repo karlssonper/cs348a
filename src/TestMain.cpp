@@ -25,6 +25,7 @@ Vector3 p1(-8, -8, 10);
 Vector3 p2(-7, -7, 7);
 Vector3 p3(-6, -6, 5);
 Vector3 p4(-5, -5, 7);
+Vector3 p5(-5, 0, -2);
 
 vector<Vector3> controlPoints;
 
@@ -115,11 +116,15 @@ void keyPressed (unsigned char key, int x, int y) {
 int main(int argc, char **argv)
 {
 
-        controlPoints.push_back(p0);
+    controlPoints.push_back(p0);
     controlPoints.push_back(p1);
     controlPoints.push_back(p2);
     controlPoints.push_back(p3);
     controlPoints.push_back(p4);
+    controlPoints.push_back(p5);
+    
+
+
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
     glutInitWindowSize(width, height);
