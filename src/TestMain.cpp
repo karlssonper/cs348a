@@ -21,8 +21,8 @@ int width = 800;
 int height = 600;
 
 Vector3 p0(-9,-9, 0);
-Vector3 p1(-8, -8, 10);
-Vector3 p2(-7, -7, 7);
+Vector3 p1(-9, -9, 5);
+Vector3 p2(-9, -4, 5);
 Vector3 p3(-6, -6, 5);
 Vector3 p4(-5, -5, 7);
 Vector3 p5(-4, -4, 3);
@@ -48,15 +48,11 @@ void initGL() {
 }
 
 void drawBezier() {
-
-
     BezierCurve::renderCurves(controlPoints, 1000, 3.f);
     BezierCurve::renderCtrlPts(controlPoints, 0.2);
     BezierCurve::renderCtrlPoly(controlPoints, 3.f);
     BezierCurve::renderCtrlPolyExt(controlPoints, 2.f);
     BezierCurve::renderCtrlPolyFill(controlPoints);
-
-    
 }
 
 void updateCamera() {
@@ -132,6 +128,9 @@ int main(int argc, char **argv)
     controlPoints.push_back(p6);
     controlPoints.push_back(p7);
     controlPoints.push_back(p8);
+    
+    float l = BezierCurve::length(controlPoints, 10000);
+    std::cout << "total length: " << l << std::endl;
     
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);

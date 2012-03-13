@@ -25,6 +25,14 @@ public:
 	static void renderCtrlPolyExt(const std::vector<Vector3> &_cpts,
 								  float _lineWidth);
 	static void renderCtrlPolyFill(const std::vector<Vector3> &_cpts);
+	
+	static float length(const Vector3 &_p1,
+						const Vector3 &_p2,
+						const Vector3 &_p3,
+						int _steps);
+	static float length(const std::vector<Vector3> &_cpts, int _steps);
+	
+	
     BezierCurve(Vector3 _p1, Vector3 _p2, Vector3 _p3);
     Vector3 evaluate(float _t);
     Vector3 p1, p2, p3;

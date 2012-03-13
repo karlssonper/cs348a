@@ -93,7 +93,32 @@ void BezierCurve::renderCtrlPolyFill(const std::vector<Vector3> &_cpts){
 		glVertex3f(p3.x, p3.y, p3.z);
     }
     glEnd();
-	
+}
 
+float BezierCurve::length(const Vector3 &_p1,
+						  const Vector3 &_p2,
+						  const Vector3 &_p3,
+						  int _steps) {
+	float l = 0.f;
+    for (int i=1; i<_steps; ++i) {
+		float t0 = (float)(i-1)/(float)(_steps-1);
+        float t1 = (float)i/(float)(_steps-1);
+        Vector3 p0 = BezierCurve::evaluate(_p1, _p2, _p3, t0);
+        Vector3 p1 = BezierCurve::evaluate(_p1, _p2, _p3, t1);
+        l += (p1-p0).mag();
+     }	
+     std::cout << "l = " << l << std::endl;
+     return l;
+}
 
+float BezierCurve::length(const std::vector<Vector3> &_cpts, 
+                          int _steps) {
+	float l = 0.f;
+	for (int i=0; i<_cpts.size()-2; i=i+2) {
+		Vector3 p1 = _cpts.at(i);
+		Vector3 p2 = _cpts.at(i+1);
+		Vector3 p3 = _cpts.at(i+2);
+		l += length(p1, p2, p3, _steps);
+	}
+	return l;
 }
