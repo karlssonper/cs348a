@@ -2,7 +2,6 @@
 #define BEZIERCURVE_H
 
 #include "MathEngine.h"
-#include <vector>
 
 class BezierCurve {
 public:
