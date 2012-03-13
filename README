@@ -1,2 +1,4 @@
 command of doom:
 mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=DEBUG -DCMAKE_INSTALL_PREFIX=.. .. && make install
+
+setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:$HOME/Dev/cs348a/project.git/lib
