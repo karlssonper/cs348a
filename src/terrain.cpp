@@ -22,7 +22,7 @@ Terrain::Terrain(char* fileVertices, char* fileTriangles)
   constructGrid(16,16);
 }
 
-Point Terrain::getGrid(Vector3 val)
+Point Terrain::getGrid(Vector3 val) const
 {
   float xStride = (maxBound.x-minBound.x) / numGridCols;
   float yStride = (maxBound.y-minBound.y) / numGridRows;
@@ -58,7 +58,7 @@ inline int max(int a, int b)
   return a > b ? a : b;
 }
 
-std::vector<Triangle> Terrain::getTriangles(Vector3 p1, Vector3 p2)
+std::vector<Triangle> Terrain::getTriangles(Vector3 p1, Vector3 p2) const
 {
   std::vector<Triangle> tri;
   // determine candidate grid cells

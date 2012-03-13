@@ -28,7 +28,7 @@ class Terrain
   void getBounds(float *minx, float *maxx, 
 		 float *miny, float *maxy, 
 		 float *minz, float *maxz);
-  std::vector<Triangle> getTriangles(Vector3 p1, Vector3 p2);
+  std::vector<Triangle> getTriangles(Vector3 p1, Vector3 p2) const;
 
   std::vector<Vector3> points;
   std::vector<Point> triangles;
@@ -38,7 +38,7 @@ class Terrain
  private:
   void ReadTerrain (char* fileName);
   void ReadTriangles(char* fileName);
-  Point getGrid(Vector3 val);
+  Point getGrid(Vector3 val) const;
   void CreateNormals();
 
   bool boundsFound;
