@@ -18,11 +18,13 @@ Vector3 BezierCurve::evaluate(const Vector3 &_p1,
 void BezierCurve::renderCurve(const Vector3 &_p1,
                               const Vector3 &_p2,
                               const Vector3 &_p3,
-                              int _steps) {
+                              int _steps,
+							  float _lineWidth) {
     glBegin(GL_POINTS);
     for (int i=0; i<_steps; ++i) {
         float t = (float)i/(float)_steps;
          Vector3 p = BezierCurve::evaluate(_p1, _p2, _p3, t);
+		 glPointSize(_lineWidth);
          glColor3f(1,1,1);
          glVertex3f(p.x, p.y, p.z);
      }
@@ -30,12 +32,13 @@ void BezierCurve::renderCurve(const Vector3 &_p1,
 }
 
 void BezierCurve::renderCurves(const std::vector<Vector3> &_cpts,
-                               int _steps) {
+                               int _steps,
+							   float _lineWidth) {
     for (int i=0; i<_cpts.size()-2; i=i+2) {
         Vector3 p1 = _cpts.at(i);
         Vector3 p2 = _cpts.at(i+1);
         Vector3 p3 = _cpts.at(i+2);
-        renderCurve(p1, p2, p3, _steps);
+        renderCurve(p1, p2, p3, _steps, _lineWidth);
     }
 }
 
@@ -50,7 +53,9 @@ void BezierCurve::renderCtrlPts(const std::vector<Vector3> &_cpts,
 	}
 }
 
-void BezierCurve::renderCtrlPoly(const std::vector<Vector3> &_cpts) {
+void BezierCurve::renderCtrlPoly(const std::vector<Vector3> &_cpts,
+								 float _lineWidth) {
+	glLineWidth(_lineWidth);
 	glColor3f(1.f, 1.f, 0.f);
 	glBegin(GL_LINE_STRIP);
 	for (int i=0; i<_cpts.size(); i++) {
