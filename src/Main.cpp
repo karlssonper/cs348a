@@ -43,6 +43,7 @@ bool bDrawTours = true;
 bool bDrawCurve = true;
 bool bDrawControlPoints = true;
 bool bDrawControlPolygon = false;
+bool bDrawControlPolygonExt = false;
 
 void reshape(int x, int y);
 
@@ -148,13 +149,16 @@ void display() {
         drawTour(&tour);
 
     if(bDrawCurve)
-        BezierCurve::renderCurves(controlPoints,5000,3);
+        BezierCurve::renderCurves(controlPoints,5000,3.f);
 
     if (bDrawControlPoints)
         BezierCurve::renderCtrlPts(controlPoints, 60);
 
     if (bDrawControlPolygon)
-        BezierCurve::renderCtrlPoly(controlPoints,3);
+        BezierCurve::renderCtrlPoly(controlPoints,4.f);
+
+    if(bDrawControlPolygon)
+        BezierCurve::renderCtrlPtsExt(controlPoints,4.f);
 
     drawMinimap();
     glEnable(GL_LIGHTING);
@@ -189,6 +193,7 @@ void printInfo()
          "  |    Press '3' - Toggle Sight Path                      |\n"
          "  |    Press '4' - Toggle Control Points                  |\n"
          "  |    Press '5' - Toggle Control Polygon                 |\n"
+         "  |    Press '6' - Toggle Control Polygon Extended        |\n"
          "  |                                                       |\n"
          "  |    Press 'esc' - Quit                                 |\n"
          "  ---------------------------------------------------------"
@@ -212,6 +217,9 @@ void keyPressed (unsigned char key, int x, int y) {
         break;
     case '5':
         bDrawControlPolygon = !bDrawControlPolygon;
+        break;
+    case '6':
+        bDrawControlPolygonExt = !bDrawControlPolygonExt;
         break;
     case 'w':
         camera->walkForward(1000.f);

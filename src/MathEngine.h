@@ -32,7 +32,7 @@ public:
     Vector3 operator/(float _f) const;
     float dot(const Vector3  &_v) const;
     Vector3 cross(const Vector3 &_v) const;
-    Vector3 normalize() const;
+    const Vector3 normalize() ;
     void xIs(float _x);
     void yIs(float _y);
     void zIs(float _z);
@@ -126,9 +126,13 @@ inline float Vector3::dot(const Vector3& _v) const {
     return x*_v.x + y*_v.y + z*_v.z;
 }
 
-inline Vector3 Vector3::normalize() const {
-    Vector3 v(*this);
-    return v/v.mag();
+inline const Vector3 Vector3::normalize(){
+    float magn = mag();
+    if (magn == 0.0f) {std::cerr << "Can't normalize a zero vector"; exit(1);}
+    x /= magn;
+    y /= magn;
+    z /= magn;
+    return *this;
 }
 
 inline void Vector3::print() const {

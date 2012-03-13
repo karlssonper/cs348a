@@ -12,7 +12,7 @@
 #include "MathEngine.h"
 
 #define CP0_ITER 600.0f
-#define D 200.f
+#define D 600.f
 class Terrain;
 class SightPath
 {
@@ -23,7 +23,7 @@ public:
     void createConstraintTangents();
     void createControlPoints();
     void removeSight(int i);
-    const std::vector<Vector3> & controlPoints() const { return controlPoints_;};
+    const std::vector<Vector3> & controlPoints() const {return controlPoints_;};
     std::vector<Vector3> sights() const;
 private:
     struct Sight {
