@@ -17,30 +17,29 @@ SightPath::SightPath(const std::vector<Vector3> & pos,
     }
 }
 
-Vector3 tangent(Vector3 p0, Vector3 p1)
+Vector3 SightPath::tangent(Vector3 p0, Vector3 p1)
 {
     Vector3 dir = p1 - p0;
-
+#define PI 3.14159265
+    float phi = atan2(dir.y, dir.x)* 180 / PI;
+    float theta = 135;
+    Vector3 t(cos(phi)*sin(theta), sin(phi)*sin(theta), cos(theta));
+    if (t.mag() == 0.0f) std::cerr << "Error tangents!!";
+    t = t/t.mag();
+    return t;
 }
 
 void SightPath::createConstraintTangents()
 {
     //first point's tangent is the direction to the first sight
-    Vector3 firstTangent = sights_[1].pos - sights_[0].pos;
-    if (firstTangent.mag() == 0.0f) std::cerr << "Error tangents!!";
-    sights_.front().tangent = firstTangent / firstTangent.mag();
-
+    sights_.front().tangent = tangent(sights_[0].pos,sights_[1].pos);
     for (int i = 1; i < sights_.size() - 1; ++i) {
-        Vector3 tangent = sights_[i+1].pos - sights_[i-1].pos;
-        if (tangent.mag() == 0.0f) std::cerr << "Error tangents!!";
-        sights_[i].tangent = tangent / tangent.mag();
+        sights_[i].tangent = tangent(sights_[i-1].pos,sights_[i+1].pos);
     }
 
     //last point's tangent is direction of the second last point.
-    Vector3 lastTangent = sights_[sights_.size()-1].pos -
-                          sights_[sights_.size()-2].pos;
-    if (lastTangent.mag() == 0.0f) std::cerr << "Error tangents!!";
-    sights_.back().tangent = lastTangent / lastTangent.mag();
+    sights_.back().tangent = tangent(sights_[sights_.size()-2].pos,
+                                     sights_[sights_.size()-1].pos);
 }
 
 void SightPath::createControlPoints()
