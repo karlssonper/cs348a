@@ -26,6 +26,9 @@ Vector3 p2(-7, -7, 7);
 Vector3 p3(-6, -6, 5);
 Vector3 p4(-5, -5, 7);
 Vector3 p5(-5, 0, -2);
+Vector3 p6(0, 0, 1);
+Vector3 p7(3, 3, 3);
+Vector3 p8(-4,-4,-4);
 
 vector<Vector3> controlPoints;
 
@@ -122,9 +125,10 @@ int main(int argc, char **argv)
     controlPoints.push_back(p3);
     controlPoints.push_back(p4);
     controlPoints.push_back(p5);
+    controlPoints.push_back(p6);
+    controlPoints.push_back(p7);
+    controlPoints.push_back(p8);
     
-
-
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
     glutInitWindowSize(width, height);
