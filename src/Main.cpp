@@ -28,6 +28,7 @@ vector<int> x;
 vector<int> y;
 vector<int> z;
 vector<Vector3> tour;
+vector<Vector3> tourColors;
 vector<Vector3> controlPoints;
 triangleList *tl;
 char *g;
@@ -48,11 +49,12 @@ bool bDrawControlPoints = true;
 bool bDrawControlPolygon = false;
 bool bDrawControlPolygonExt = false;
 bool bDrawControlPolyFill = false;
+bool bDrawToursBB = false;
 bool wasd[4] = {false,false,false,false};
 
 void reshape(int x, int y);
 void drawCurves();
-
+void display();
 void drawTriangles()
 {
   glColor3f(1.f, 1.f, 1.f);
@@ -60,13 +62,26 @@ void drawTriangles()
 }
 
 void drawTour(vector<Vector3> *tour) {
-  glColor3f(1.f, 0.f, 0.f);
   for (int i=0; i<tour->size(); ++i) {
     glPushMatrix();
     glTranslatef(tour->at(i).x, tour->at(i).y, tour->at(i).z);
-    glutSolidSphere(50, 50, 50);
+    glColor3f(tourColors[i].x,tourColors[i].y,tourColors[i].z);
+    glutSolidCube(50);
     glPopMatrix();
   }
+}
+
+void drawBoundingTour(vector<Vector3> *tour) {
+    glEnable (GL_BLEND);
+    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    for (int i=0; i<tour->size(); ++i) {
+    glPushMatrix();
+    glTranslatef(tour->at(i).x, tour->at(i).y, tour->at(i).z);
+    glColor4f(tourColors[i].x,tourColors[i].y,tourColors[i].z,0.3f);
+    glutSolidCube(2*D);
+    glPopMatrix();
+    }
+    glDisable(GL_BLEND);
 }
 
 void drawMinimap()
@@ -78,11 +93,11 @@ void drawMinimap()
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   glViewport(0, 0, miniWidth, miniHeight);
-  glOrtho(0.0, 10000.0, 0.0, 10000.0, 1.0, 10000);
+  glOrtho(-20000, 20000.0, -20000, 20000.0, -30.0, 2000);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  gluLookAt(5000.0, 5000.0, 5000.0,
-	    5000.0, 5000.0, 0.0,
+  gluLookAt(0000.0, 0000.0, 0000.0,
+	    0.0, 0.0, 1.0,
 	    0.0, 1.0, 0.0);
   //  camera->lookThrough();
   //drawCurves();
@@ -117,6 +132,10 @@ void parseTour(string filename,
             infile >> ztemp;
             if (infile.eof()) break;
             tour->push_back(Vector3(xtemp,ytemp,ztemp));
+            tourColors.push_back(Vector3(
+                    rand() / (float)RAND_MAX,
+                    rand() / (float)RAND_MAX,
+                    rand() / (float)RAND_MAX));
         }
     } else {
         cout << filename << " could not be opened" << endl;
@@ -127,14 +146,20 @@ void parseTour(string filename,
 void initGL() {
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
-    glClearColor(0.2f, 0.2f, 0.2f, 1.f);
+    //glClearColor(0.2f, 0.2f, 0.2f, 1.f);
     glEnable(GL_DEPTH_TEST);
     glMatrixMode(GL_PROJECTION);
+    glShadeModel(GL_SMOOTH);
     glLoadIdentity();
     glViewport(0, 0, width, height);
     gluPerspective(60.f, width/height, 0.1f, 100000.f);
     glMatrixMode(GL_MODELVIEW);
     camera = new Camera(0.0f, 0.0f, 2000.f, 0.f, 0.f);
+    camera->posX = 7553.189941;
+    camera->posY = -6245.730469;
+    camera->posZ = 14367.314453;
+    camera->yaw = 142.399872;
+    camera->pitch = 36.799988;
 }
 
 void drawCurves()
@@ -153,6 +178,10 @@ void drawCurves()
   
   if (bDrawControlPolyFill)
     BezierCurve::renderCtrlPolyFill(controlPoints);
+
+  if(bDrawToursBB)
+    drawBoundingTour(&tour);
+
 }
     
 void display() {
@@ -182,11 +211,8 @@ void display() {
         glVertex3d(0.f, 0.f, 100000.f);
     glEnd();*/
     glEnable(GL_LIGHTING);
-
     GLfloat lightPos[] = { 0.0, -1.0, 1.0, 0.0 };
     glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
-
-
     if(bDrawTerrain)
         drawTriangles();
     glDisable(GL_LIGHTING);
@@ -194,8 +220,8 @@ void display() {
         drawTour(&tour);
 
     drawCurves();
+    //drawMinimap();
 
-    drawMinimap();
     glEnable(GL_LIGHTING);
 
     glutSwapBuffers();
@@ -240,6 +266,7 @@ void printInfo()
          "  |    Press '5' - Toggle Control Polygon                 |\n"
          "  |    Press '6' - Toggle Control Polygon Extended        |\n"
          "  |    Press '7' - Toggle Control Polygon Filled          |\n"
+         "  |    Press '8' - Toggle Sights Bounding Boxsed          |\n"
          "  |                                                       |\n"
          "  |    Press 'esc' - Quit                                 |\n"
          "  ---------------------------------------------------------"
@@ -270,6 +297,9 @@ void keyPressed (unsigned char key, int x, int y) {
         break;
     case '7':
         bDrawControlPolyFill = !bDrawControlPolyFill;
+        break;
+    case '8':
+        bDrawToursBB = !bDrawToursBB;
         break;
     case 'w':
         wasd[0] = true;
@@ -350,6 +380,7 @@ int main(int argc, char **argv)
     delaunay1(g);
     copyGraphToListOfTriangles(g, &tl);
 */
+    srand(0);
     parseTour("../data/hw4.tour", &tour);
     cout << "Parsed tour, found " << tour.size()/3 << " sights" << endl;
 
@@ -357,7 +388,7 @@ int main(int argc, char **argv)
     printf("terrain loaded\n");
     terrain->print();
 
-    tour.resize(9);
+    //tour.resize(9);
     sightPath = new SightPath(terrain, tour);
     sightPath2 = new SightPath2(terrain, tour);    
     createSightPaths();

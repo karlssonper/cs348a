@@ -152,3 +152,11 @@ float BezierCurve::length(const std::vector<Vector3> &_cpts,
 	}
 	return l;
 }
+
+float BezierCurve::curvature(const Vector3 &_p1,
+						     const Vector3 &_p2,
+						     const Vector3 &_p3,
+						     float _t) {
+								 
+								 
+}

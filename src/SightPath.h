@@ -41,7 +41,7 @@ private:
     void solve (Sight sight0, Sight sight1);
     Vector3 tangent(Vector3 p0, Vector3 p1);
     bool intersection(const Vector3 & source, const Vector3 &dest);
-    Vector3 lineIntersect(Vector3 v0, Vector3 v1, Vector3 v2, Vector3 v3) const;
+    bool intersection(const Vector3 & v0, const Vector3 &v1, const Vector3 &v2);
 };
 
 
