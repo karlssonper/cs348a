@@ -34,6 +34,10 @@ public:
 						int _steps);
 	static float length(const std::vector<Vector3> &_cpts, int _steps);
 	
+	static float curvature(const Vector3 &_p1,
+						   const Vector3 &_p2,
+						   const Vector3 &_p3,
+						   float _t);
 	
     BezierCurve(Vector3 _p1, Vector3 _p2, Vector3 _p3);
     Vector3 evaluate(float _t);
