@@ -39,18 +39,18 @@ void drawTriangles(triangleList *tl,
                    int *y,
                    int *z) {
 
-    glColor3f(1.f, 1.f, 1.f);
-    terrain->renderTriangles();
+  glColor3f(1.f, 1.f, 1.f);
+  terrain->renderTriangles();
 }
 
 void drawTour(vector<Vector3> *tour) {
-    glColor3f(1.f, 0.f, 0.f);
-    for (int i=0; i<tour->size(); ++i) {
-        glPushMatrix();
-        glTranslatef(tour->at(i).x, tour->at(i).y, tour->at(i).z);
-        glutSolidSphere(50, 50, 50);
-        glPopMatrix();
-    }
+  glColor3f(1.f, 0.f, 0.f);
+  for (int i=0; i<tour->size(); ++i) {
+    glPushMatrix();
+    glTranslatef(tour->at(i).x, tour->at(i).y, tour->at(i).z);
+    glutSolidSphere(50, 50, 50);
+    glPopMatrix();
+  }
 }
 
 
@@ -173,11 +173,16 @@ int main(int argc, char **argv)
     cout << "Parsed tour, found " << tour.size()/3 << " sights" << endl;
 
     terrain = new Terrain("../src/sample.mesh3","../src/sample.triangles3");
+    printf("terrain loaded\n");
     sightPath = new SightPath(terrain, tour);
+    printf("sight path loaded\n");
     sightPath->createConstraintTangents();
+    printf("constraint trangents made\n");
     sightPath->createControlPoints();
+    printf("control points created\n");
     controlPoints = sightPath->controlPoints();
     terrain->print();
+    printf("everything made\n");
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
     glutInitWindowSize(width, height);

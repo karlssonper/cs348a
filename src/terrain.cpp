@@ -68,19 +68,19 @@ std::vector<Triangle> Terrain::getTriangles(Vector3 p1, Vector3 p2) const
   std::vector<Point> gridCells;  
   int minX = max(0, min(grid1.x-1, grid2.x-1));
   int minY = max(0, min(grid1.y-1, grid2.y-1));
-  int maxX = min(numGridCols, max(grid1.x+1, grid2.x+1));
-  int maxY = min(numGridRows, max(grid1.y+1, grid2.y+1));
-  printf("min(%i,%i) max(%i,%i)\n",minX,minY,maxX,maxY);
+  int maxX = min(numGridCols-1, max(grid1.x+1, grid2.x+1));
+  int maxY = min(numGridRows-1, max(grid1.y+1, grid2.y+1));
+  //printf("min(%i,%i) max(%i,%i)\n",minX,minY,maxX,maxY);
+  int numElements = 0;
   for (int col = minX; col <= maxX; col++)
     {
       for (int row = minY; row <= maxY; row++)
 	{
 	  Point gridCell = Point(col,row,0);
 	  gridCells.push_back(gridCell);
+	  numElements += grid[gridCell.y*numGridCols+gridCell.x].size();
 	} 
     }
-  if (gridCells.size() > 9)
-    printf(" lots of grid cells\n");
   // add all the elements in the grid cells to the result vector
   for (int i = 0; i < gridCells.size(); i++)
     {

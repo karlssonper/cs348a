@@ -36,12 +36,8 @@ class Terrain
  private:
   void ReadTerrain (char* fileName);
   void ReadTriangles(char* fileName);
-<<<<<<< HEAD
-  Point getGrid(Vector3 val);
   void constructGrid(int rows, int cols);
-=======
   Point getGrid(Vector3 val) const;
->>>>>>> 25bbc7816e83b1c2d6628e279d5fe741b510d113
   void CreateNormals();
   void CreateColors();
 
