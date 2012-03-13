@@ -11,6 +11,7 @@
 #include "terrain.h"
 #include <limits>
 #include <stdio.h>
+#include "BezierCurve.h"
 
 SightPath::SightPath(const Terrain * terrain,
           const std::vector<Vector3> &sights) : terrain_(terrain)
@@ -71,16 +72,13 @@ std::vector<Vector3> SightPath::sights() const
 void SightPath::solve (Sight sight0, Sight sight1)
 {
     Vector3 cp0 = sight0.pos, cp1 = sight1.pos, mp;
-    bool ok = true;
     do {
-        cp0 = cp0 + sight0.tangent *  CP_SCALE;
-        cp1 = cp1 + sight1.tangent * -CP_SCALE;
+        cp0 = cp0 + sight0.tangent * CP_SCALE;
+        cp1 = cp1 - sight1.tangent * CP_SCALE;
+        if (intersection(sight0.pos,cp0)) cp0 = cp0 - sight0.tangent * CP_SCALE;
+        if (intersection(sight1.pos,cp1)) cp1 = cp1 + sight1.tangent * CP_SCALE;
         mp = (cp0+cp1)/2.f;
-        ok = intersection(sight0.pos,mp) ||
-             intersection(cp0,mp) ||
-             intersection(mp,sight1.pos) ||
-             intersection(mp,cp1);
-    } while (ok);
+    } while (intersection(sight0.pos,cp0,mp) ||intersection(sight1.pos,cp1,mp));
 
     controlPoints_.push_back(sight0.pos);
     controlPoints_.push_back(cp0);
@@ -88,75 +86,14 @@ void SightPath::solve (Sight sight0, Sight sight1)
     controlPoints_.push_back(cp1);
 }
 
-/*
-void SightPath::solve (Sight sight0, Sight sight1)
+
+bool SightPath::intersection(const Vector3 & v0,
+                             const Vector3 &v1,
+                             const Vector3 &v2)
 {
-    Vector3 cp0;
-    bool hit = true;
-    float scale = 1.f;
-    do {
-        cp0 = sight0.pos + sight0.tangent * CP0_ITER/scale;
-        Vector3 test = sight0.tangent * CP0_ITER/scale;
-        std::cout << "cp0 tanget: " << test.x << " " << test.y << " " << test.z << std::endl;
-        std::cout << "cp0 mag: " << test.mag() << std::endl;
-        scale *= 2.f;
-        hit = intersection(sight0.pos,cp0);
-    } while (hit);
-
-    //std::cout << "First hit done" << std::endl;
-
-    Vector3 mp = (cp0 + sight1.pos)/2.0f;
-    Vector3 u = cp0 - sight1.pos;
-    u = u/u.mag();
-    Vector3 mp_dir = sight1.tangent*-1.f - (u*u.dot(sight1.tangent*-1.f));
-    mp_dir = mp_dir / mp_dir.mag();
-    hit = true;
-    do {
-        mp = mp + mp_dir;
-        //std::cout << "Before first intersection hit done" << std::endl;
-        //std::cout << "mp pos: " << mp.x << " " << mp.y << " " << mp.z << std::endl;
-
-        hit = intersection(cp0,mp);
-    } while (hit);
-    //std::cout << "Second hit done" << std::endl;
-
-    Vector3 v0 = cp0;
-    Vector3 v1 = mp-cp0;
-    v1 = v1/v1.mag();
-    Vector3 v2 = sight1.pos;
-    Vector3 v3 = sight1.tangent * (-1.f);
-
-    Vector3 cp1 = lineIntersect(v0,v1,v2,v3);
-
-    controlPoints_.push_back(sight0.pos);
-    controlPoints_.push_back(cp0);
-    controlPoints_.push_back(mp);
-    controlPoints_.push_back(cp1);
-    printf("Point %f %f %f\n", sight0.pos.x, sight0.pos.y, sight0.pos.z);
-    printf("Point %f %f %f\n", cp0.x, cp0.y, cp0.z);
-    printf("Point %f %f %f\n", mp.x, mp.y, mp.z);
-    printf("Point %f %f %f\n", cp1.x, cp1.y, cp1.z);
-
-    std::cout << "4 new Control points added!" << std::endl;
-}*/
-
-Vector3 SightPath::lineIntersect(Vector3 v0,
-                                          Vector3 v1,
-                                          Vector3 v2,
-                                          Vector3 v3) const
-{
-    float den = v3.x*v1.y - v3.y*v1.x;
-    if (den == 0.0f) std::cerr << "AAAH LINEINTERSECT ERROR!!";
-    float t2 = (v1.x*(v2.y-v0.y) - v1.y * (v2.x-v0.x)/den);
-    float t1 = (v2.x-v0.x + t2*v3.x)/v1.x;
-
-    Vector3 vt1 = v0 + v1*t1;
-    Vector3 vt2 = v2 + v3*t2;
-
-    printf("VT1 %f %f %f\n", vt1.x, vt1.y, vt1.z);
-    printf("VT2 %f %f %f\n", vt2.x, vt2.y, vt2.z);
-
-    return v2 + v3*t2;
+    return intersection(v0,v1) ||
+            intersection(v0,v2) ||
+            intersection(v1,v2);
 }
 
 bool SightPath::intersection(const Vector3 & source, const Vector3 &dest)
@@ -168,7 +105,6 @@ bool SightPath::intersection(const Vector3 & source, const Vector3 &dest)
         IntersectionInfo ii = triangles[i].rayIntersect(r);
         //if (ii.t < dir.mag()) {
         if (ii.hit) {
-            std::cout << "t" <<  ii.t << std::endl;
             return true;
 
         }
