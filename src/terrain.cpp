@@ -1,4 +1,6 @@
 #include "terrain.h"
+#include <stdio.h>
+#include <string.h>
 
 Point::Point(int _x, int _y, int _z)
 {
