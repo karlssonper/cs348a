@@ -12,9 +12,6 @@ extern "C" {
 #include <fstream>
 #include <math.h>
 #include "Camera.h"
-#include "Triangle.h"
-#include "IntersectionInfo.h"
-#include "Ray.h"
 
 using namespace std;
 
@@ -149,10 +146,12 @@ void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glLoadIdentity();
-
+    
+    glRotatef(-90.f, 1.f, 0.f, 0.f);
+    
     camera->lookThrough();
     
-    
+   
     glDisable(GL_LIGHTING);
     glBegin(GL_LINES);
         glColor3f(1.f, 0.f, 0.f);
@@ -198,10 +197,10 @@ void keyPressed (unsigned char key, int x, int y) {
         camera->pitchInc(3.f);
         break;
     case 'q':
-        camera->yawInc(3.f);
+        camera->yawInc(-3.f);
         break;
     case 'e':
-        camera->yawInc(-3.f);
+        camera->yawInc(3.f);
         break;
     case 'w':
         camera->walkForward(100.f);
