@@ -13,11 +13,25 @@ extern "C" {
 #include <math.h>
 #include "BezierCurve.h"
 #include "MathEngine.h"
+#include <vector>
 
 using namespace std;
 
 int width = 800;
 int height = 600;
+
+Vector3 p0(-9,-9, 0);
+Vector3 p1(-8, -8, 10);
+Vector3 p2(-7, -7, 7);
+Vector3 p3(-6, -6, 5);
+Vector3 p4(-5, -5, 7);
+
+vector<Vector3> controlPoints;
+
+float cameraT = 0.f;
+float cameraInc = 0.05;
+Vector3 cameraPos = p1;
+Vector3 cameraDir = p2;
 
 void initGL() {
     glClearColor(0.2f, 0.2f, 0.2f, 1.f);
@@ -30,37 +44,48 @@ void initGL() {
 }
 
 void drawBezier() {
-    Vector3 p1(0.f, 0.f, 0.f);
-    Vector3 p2(0.f, 1.f, 0.f);
-    Vector3 p3(1.f, 1.f, 0.f);
 
-    glColor3f(1.f, 0.f, 0.f);
-    glPushMatrix(); glTranslatef(p1.x, p1.y, p1.z);
-    glutSolidSphere(10, 10, 10);
-    glPopMatrix();
-    glPushMatrix(); glTranslatef(p2.x, p2.y, p2.z);
-    glutSolidSphere(10, 10, 10);
-    glPopMatrix();
-    glPushMatrix(); glTranslatef(p2.x, p2.y, p2.z);
-    glutSolidSphere(10, 10, 10);
-    glPopMatrix();
 
-    int steps = 100;
+    //BezierCurve::renderCurves(controlPoints, 1000);
 
-    glColor3f(1.f, 1.f, 1.f);
-    glBegin(GL_POINTS);
-    for (int i=0; i<steps; ++i) {
-        float t = (float)i/(float)steps;
-        Vector3 p = BezierCurve::evaluate(p1, p2, p3, t);
-        glVertex3f(p.x, p.y, p.z);
-    }   
-    glEnd();
+    
+}
+
+void updateCamera() {
+    cameraPos = BezierCurve::evaluate(p1, p2, p3, cameraT);
+    cameraDir = BezierCurve::evaluate(p1, p2, p3, cameraT+cameraInc);
 }
     
 void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
-   
+
+    gluLookAt(0, -30, 20, 0, 0, 0, 0, 0, 1);
+
+    glColor3f(0.5, 0.5, 0.5);
+    glBegin(GL_TRIANGLES);
+        glVertex3f(-10, -10, 0);
+        glVertex3f(10, -10, 0);
+        glVertex3f(-10, 10, 0);
+        glVertex3f(-10, 10, 0);
+        glVertex3f(10, -10, 0);
+        glVertex3f(10, 10, 0);
+    glEnd();
+
+    /*
+    gluLookAt(cameraPos.x,
+              cameraPos.y,
+              cameraPos.z,
+              cameraDir.x,
+              cameraDir.y,
+              cameraDir.z,
+              0, 1, 0);
+    */
+
+    //std::cout << "cameraPos: " << cameraPos.x << " " << cameraPos.y << " " << cameraPos.z << std::endl;
+    //std::cout << "cameraDir: " << cameraDir.x << " " << cameraDir.y << " " << cameraDir.z << std::endl;
+    
+
     drawBezier();
 
     glFlush();
@@ -76,8 +101,25 @@ void reshape(int x, int y) {
     glMatrixMode(GL_MODELVIEW);
 }
 
+void keyPressed (unsigned char key, int x, int y) {  
+    switch (key) {
+    case 'w':
+        cameraT += cameraInc;
+        updateCamera();
+        glutPostRedisplay();
+        glutSwapBuffers();
+        break;
+    }
+}
+
 int main(int argc, char **argv)
 {
+
+        controlPoints.push_back(p0);
+    controlPoints.push_back(p1);
+    controlPoints.push_back(p2);
+    controlPoints.push_back(p3);
+    controlPoints.push_back(p4);
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
     glutInitWindowSize(width, height);
@@ -86,6 +128,7 @@ int main(int argc, char **argv)
     glutReshapeFunc(reshape);
     glutDisplayFunc(display);
     glutIdleFunc(display);
+    glutKeyboardFunc(keyPressed);
     glutMainLoop();
     return 0;
 }
