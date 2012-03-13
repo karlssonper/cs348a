@@ -14,6 +14,7 @@ extern "C" {
 #include "Camera.h"
 #include "terrain.h"
 #include "SightPath.h"
+#include "BezierCurve.h"
 
 using namespace std;
 
@@ -114,6 +115,7 @@ void display() {
 
     glDisable(GL_LIGHTING);
     drawTour(&tour);
+    BezierCurve::renderCurves(controlPoints,1000);
     glEnable(GL_LIGHTING);
 
     glutSwapBuffers();
