@@ -53,6 +53,7 @@ void drawBezier() {
     BezierCurve::renderCurves(controlPoints, 1000, 3.f);
     BezierCurve::renderCtrlPts(controlPoints, 0.2);
     BezierCurve::renderCtrlPoly(controlPoints, 3.f);
+    BezierCurve::renderCtrlPolyExt(controlPoints, 2.f);
 
     
 }
