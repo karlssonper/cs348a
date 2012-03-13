@@ -11,22 +11,13 @@ extern "C" {
 #include <iostream>
 #include <fstream>
 #include <math.h>
-#include "Bezier.h"
+#include "BezierCurve.h"
 #include "MathEngine.h"
 
 using namespace std;
 
 int width = 800;
 int height = 600;
-
-vector<int> x;
-vector<int> y;
-vector<int> z;
-vector<float> tour;
-triangleList *tl;
-char *g;
-int n, tn;
-Camera* camera;
 
 void initGL() {
     glClearColor(0.2f, 0.2f, 0.2f, 1.f);
@@ -95,7 +86,6 @@ int main(int argc, char **argv)
     glutReshapeFunc(reshape);
     glutDisplayFunc(display);
     glutIdleFunc(display);
-    glutKeyboardFunc(keyPressed);
     glutMainLoop();
     return 0;
 }
