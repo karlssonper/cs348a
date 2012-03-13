@@ -50,4 +50,12 @@ void BezierCurve::renderCtrlPts(const std::vector<Vector3> &_cpts,
 	}
 }
 
+void BezierCurve::renderCtrlPoly(const std::vector<Vector3> &_cpts) {
+	glColor3f(1.f, 1.f, 0.f);
+	glBegin(GL_LINE_STRIP);
+	for (int i=0; i<_cpts.size(); i++) {
+		glVertex3f(_cpts.at(i).x, _cpts.at(i).y, _cpts.at(i).z);
+	}
+	glEnd();
+}
 
