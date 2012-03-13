@@ -27,6 +27,7 @@ triangleList *tl;
 char *g;
 int n, tn;
 Camera* camera;
+int mouseX, mouseY;
 
 Terrain *terrain;
 
@@ -193,18 +194,6 @@ void reshape(int x, int y) {
 
 void keyPressed (unsigned char key, int x, int y) {  
     switch (key) {
-    case 'r':
-        camera->pitchInc(-3.f);
-        break;
-    case 'f':
-        camera->pitchInc(3.f);
-        break;
-    case 'q':
-        camera->yawInc(-3.f);
-        break;
-    case 'e':
-        camera->yawInc(3.f);
-        break;
     case 'w':
         camera->walkForward(100.f);
         break;
@@ -219,6 +208,22 @@ void keyPressed (unsigned char key, int x, int y) {
         break;
     }
 }  
+
+void mouseFunc(int x,int y)
+{
+    int dx = x - mouseX;
+    int dy = y - mouseY;
+    mouseX = x;
+    mouseY = y;
+    camera->yawInc(1.6*dx);
+    camera->pitchInc(1.6*dy);
+}
+
+void mouseMoveFunc(int x,int y)
+{
+    mouseX = x;
+    mouseY = y;
+}
 
 int main(int argc, char **argv)
 {
@@ -243,6 +248,8 @@ int main(int argc, char **argv)
     glutDisplayFunc(display);
     glutIdleFunc(display);
     glutKeyboardFunc(keyPressed);
+    glutMotionFunc(mouseFunc);
+    glutPassiveMotionFunc(mouseMoveFunc);
 
     glutMainLoop();
     return 0;

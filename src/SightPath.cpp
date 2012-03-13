@@ -44,6 +44,7 @@ void SightPath::createConstraintTangents()
 
 void SightPath::createControlPoints()
 {
+    controlPoints_.clear();
     for (int i = 0; i < sights_.size() - 1; ++i){
         solve(sights_[i],sights_[i + 1]);
     }
