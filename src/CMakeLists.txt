@@ -15,4 +15,4 @@ TARGET_LINK_LIBRARIES(main GL GLU glut minmaxer)
 TARGET_LINK_LIBRARIES(testmain GL GLU glut minmaxer)
 
 INSTALL (TARGETS main DESTINATION bin)
-
+INSTALL (TARGETS testmain DESTINATION bin)
