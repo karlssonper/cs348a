@@ -20,13 +20,12 @@ void BezierCurve::renderCurve(const Vector3 &_p1,
                               const Vector3 &_p3,
                               int _steps,
 							  float _lineWidth) {
-    glEnable(GL_POINT_SIZE);
-    glBegin(GL_POINTS);
+    glBegin(GL_LINE_STRIP);
+    glLineWidth(_lineWidth);
+    glColor3f(1,1,1);
     for (int i=0; i<_steps; ++i) {
         float t = (float)i/(float)_steps;
          Vector3 p = BezierCurve::evaluate(_p1, _p2, _p3, t);
-		 glPointSize(_lineWidth);
-         glColor3f(1,1,1);
          glVertex3f(p.x, p.y, p.z);
      }
      glEnd();
