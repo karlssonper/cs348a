@@ -76,7 +76,8 @@ void SightPath::solve (Sight sight0, Sight sight1)
     do {
         cp0 = sight0.pos + sight0.tangent * CP0_ITER/scale;
         Vector3 test = sight0.tangent * CP0_ITER/scale;
-        std::cout << "cp0 pos: " << test.x << " " << test.y << " " << test.z << std::endl;
+        std::cout << "cp0 tanget: " << test.x << " " << test.y << " " << test.z << std::endl;
+        std::cout << "cp0 mag: " << test.mag() << std::endl;
         scale *= 2.f;
         hit = intersection(sight0.pos,cp0);
     } while (hit);
@@ -126,17 +127,26 @@ Vector3 SightPath::lineIntersect(Vector3 v0,
     float den = v3.x*v1.y - v3.y*v1.x;
     if (den == 0.0f) std::cerr << "AAAH LINEINTERSECT ERROR!!";
     float t2 = (v1.x*(v2.y-v0.y) - v1.y * (v2.x-v0.x)/den);
+    float t1 = (v2.x-v0.x + t2*v3.x)/v1.x;
+
+    Vector3 vt1 = v0 + v1*t1;
+    Vector3 vt2 = v2 + v3*t2;
+
+    printf("VT1 %f %f %f\n", vt1.x, vt1.y, vt1.z);
+    printf("VT2 %f %f %f\n", vt2.x, vt2.y, vt2.z);
+
     return v2 + v3*t2;
 }
 
 bool SightPath::intersection(const Vector3 & source, const Vector3 &dest)
 {
     std::vector<Triangle> triangles = terrain_->getTriangles(source,dest);
-    Vector3 dir = dest-source;
-    Ray r(source,dir,0, std::numeric_limits<float>::max());
+    Vector3 dir = (dest-source);
+    Ray r(source,dir,0, 1.0f);
     for (int i = 0; i < triangles.size(); ++i) {
         IntersectionInfo ii = triangles[i].rayIntersect(r);
-        if (ii.t > dir.mag()) {
+        //if (ii.t < dir.mag()) {
+        if (ii.hit) {
             std::cout << "t" <<  ii.t << std::endl;
             return true;
 
