@@ -41,11 +41,6 @@ SightPath * sightPath;
 bool bDrawTerrain = true;
 bool bDrawTours = true;
 
-void drawTriangles(triangleList *tl,
-                   int *x,
-                   int *y,
-                   int *z) {
-
 void reshape(int x, int y);
 
 void drawTriangles()
