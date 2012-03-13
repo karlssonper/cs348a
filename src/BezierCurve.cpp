@@ -27,31 +27,27 @@ void BezierCurve::renderCurve(const Vector3 &_p1,
          glVertex3f(p.x, p.y, p.z);
      }
      glEnd();
-
-    // hardcoded stuff to render the control points
-    glColor3f(0.0, 1.0, 0.0);
-    glPushMatrix(); glTranslatef(_p1.x, _p1.y, _p1.z);
-    glutSolidSphere(60, 50, 50);
-    glPopMatrix();
-    glPushMatrix(); glTranslatef(_p2.x, _p2.y, _p2.z);
-    glutSolidSphere(60, 50, 50);
-    glPopMatrix();
-    glPushMatrix(); glTranslatef(_p3.x, _p3.y, _p3.z);
-    glutSolidSphere(60, 50, 50);
-    glPopMatrix();
-    
 }
 
 void BezierCurve::renderCurves(const std::vector<Vector3> &_cpts,
                                int _steps) {
-
     for (int i=0; i<_cpts.size()-2; i=i+2) {
         Vector3 p1 = _cpts.at(i);
         Vector3 p2 = _cpts.at(i+1);
         Vector3 p3 = _cpts.at(i+2);
         renderCurve(p1, p2, p3, _steps);
     }
+}
 
+void BezierCurve::renderCtrlPts(const std::vector<Vector3> &_cpts,
+								float _size) {
+	glColor3f(0.f, 1.f, 0.f);
+	for (int i=0; i<_cpts.size(); i++) {
+		glPushMatrix();
+		glTranslatef(_cpts.at(i).x, _cpts.at(i).y, _cpts.at(i).z);
+		glutSolidSphere(_size, 30, 30);
+		glPopMatrix();
+	}
 }
 
 

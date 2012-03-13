@@ -21,6 +21,9 @@ using namespace std;
 int width = 800;
 int height = 600;
 
+int miniWidth = 200;
+int miniHeight = 150;
+
 vector<int> x;
 vector<int> y;
 vector<int> z;
@@ -43,6 +46,10 @@ void drawTriangles(triangleList *tl,
                    int *y,
                    int *z) {
 
+void reshape(int x, int y);
+
+void drawTriangles()
+{
   glColor3f(1.f, 1.f, 1.f);
   terrain->renderTriangles();
 }
@@ -57,6 +64,27 @@ void drawTour(vector<Vector3> *tour) {
   }
 }
 
+void drawMinimap()
+{
+  glEnable(GL_LIGHTING);
+  glScissor(0,0,miniWidth,miniHeight);
+  glEnable(GL_SCISSOR_TEST);
+  glClear(GL_DEPTH_BUFFER_BIT);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  glViewport(0, 0, miniWidth, miniHeight);
+  glOrtho(0.0, 10000.0, 0.0, 10000.0, 1.0, 10000);
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  gluLookAt(5000.0, 5000.0, 5000.0,
+	    5000.0, 5000.0, 0.0,
+	    0.0, 1.0, 0.0);
+  //  camera->lookThrough();
+  drawTriangles();
+  reshape(width,height);
+  glDisable(GL_SCISSOR_TEST);
+  glDisable(GL_LIGHTING);
+}
 
 void parseTour(string filename,
                vector<Vector3> *tour) {
@@ -114,11 +142,14 @@ void display() {
     GLfloat lightPos[] = { 0.0, -1.0, 1.0, 0.0 };
     glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
 
-    drawTriangles(tl, &x[0], &y[0], &z[0]);
 
+    if(bDrawTerrain)
+        drawTriangles();
     glDisable(GL_LIGHTING);
-    drawTour(&tour);
+    if (bDrawTours)
+        drawTour(&tour);
     BezierCurve::renderCurves(controlPoints,5000);
+    drawMinimap();
     glEnable(GL_LIGHTING);
 
     glutSwapBuffers();
