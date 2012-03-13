@@ -13,6 +13,7 @@ extern "C" {
 #include <math.h>
 #include "Camera.h"
 #include "terrain.h"
+#include "SightPath.h"
 
 using namespace std;
 
@@ -22,7 +23,8 @@ int height = 600;
 vector<int> x;
 vector<int> y;
 vector<int> z;
-vector<float> tour;
+vector<Vector3> tour;
+vector<Vector3> controlPoints;
 triangleList *tl;
 char *g;
 int n, tn;
@@ -30,6 +32,7 @@ Camera* camera;
 int mouseX, mouseY;
 
 Terrain *terrain;
+SightPath * sightPath;
 
 /*void calculateNormal(float x1,  float y1,  float z1,
                      float x2,  float y2,  float z2, 
@@ -74,11 +77,11 @@ void drawTriangles(triangleList *tl,
     terrain->renderTriangles();
 }
 
-void drawTour(vector<float> *tour) {
+void drawTour(vector<Vector3> *tour) {
     glColor3f(1.f, 0.f, 0.f);
-    for (int i=0; i<tour->size()/3; ++i) {
+    for (int i=0; i<tour->size(); ++i) {
         glPushMatrix();
-        glTranslatef(tour->at(3*i), tour->at(3*i+1), tour->at(3*i+2));
+        glTranslatef(tour->at(i).x, tour->at(i).y, tour->at(i).z);
         glutSolidSphere(50, 50, 50);
         glPopMatrix();
     }
@@ -114,7 +117,7 @@ void parsePoints(string filename,
 }
 
 void parseTour(string filename,
-               vector<float> *tour) {
+               vector<Vector3> *tour) {
     float xtemp, ytemp, ztemp;
     ifstream infile;
     infile.open(filename.c_str());
@@ -124,9 +127,7 @@ void parseTour(string filename,
             infile >> ytemp;
             infile >> ztemp;
             if (infile.eof()) break;
-            tour->push_back(xtemp);
-            tour->push_back(ytemp);
-            tour->push_back(ztemp);
+            tour->push_back(Vector3(xtemp,ytemp,ztemp));
         }
     } else {
         cout << filename << " could not be opened" << endl;
@@ -233,11 +234,15 @@ int main(int argc, char **argv)
     planeSweep(g);
     delaunay1(g);
     copyGraphToListOfTriangles(g, &tl);
-
+*/
     parseTour("../data/hw4.tour", &tour);
-    cout << "Parsed tour, found " << tour.size()/3 << " sights" << endl;*/
+    cout << "Parsed tour, found " << tour.size()/3 << " sights" << endl;
 
     terrain = new Terrain("../src/sample.mesh3","../src/sample.triangles3");
+    sightPath = new SightPath(terrain, tour);
+    sightPath->createConstraintTangents();
+    sightPath->createControlPoints();
+    controlPoints = sightPath->controlPoints();
     terrain->print();
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
