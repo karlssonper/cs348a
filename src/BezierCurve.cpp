@@ -44,7 +44,7 @@ void BezierCurve::renderCurves(const std::vector<Vector3> &_cpts,
 
 void BezierCurve::renderCtrlPts(const std::vector<Vector3> &_cpts,
 								float _size) {
-	glColor3f(0.f, 1.f, 0.f);
+	glColor3f(0.f, 0.7f, 0.f);
 	for (int i=0; i<_cpts.size(); i++) {
 		glPushMatrix();
 		glTranslatef(_cpts.at(i).x, _cpts.at(i).y, _cpts.at(i).z);
@@ -67,7 +67,7 @@ void BezierCurve::renderCtrlPoly(const std::vector<Vector3> &_cpts,
 void BezierCurve::renderCtrlPolyExt(const std::vector<Vector3> &_cpts,
 									float _lineWidth) {
 	glLineWidth(_lineWidth);
-	glColor3f(1.f, 0.5f, 0.f);
+	glColor3f(0.f, 0.3f, 0.7f);
 	glBegin(GL_LINES);
 	for (int i=2; i<_cpts.size(); i=i+2) {
 		Vector3 dir = _cpts.at(i)-_cpts.at(i-1);
@@ -82,7 +82,7 @@ void BezierCurve::renderCtrlPolyFill(const std::vector<Vector3> &_cpts){
 	
 	glEnable (GL_BLEND);
 	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glColor4f(1.0f, 0.4f, 0.4f, 0.6f);
+	glColor4f(0.7f, 0.0f, 0.0f, 0.3f);
 	glBegin(GL_TRIANGLES);
 	for (int i=0; i<_cpts.size()-2; i=i+2) {
         Vector3 p1 = _cpts.at(i);
