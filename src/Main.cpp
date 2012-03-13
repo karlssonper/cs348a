@@ -143,15 +143,13 @@ void initGL() {
     glViewport(0, 0, width, height);
     gluPerspective(60.f, width/height, 0.1f, 100000.f);
     glMatrixMode(GL_MODELVIEW);
-    camera = new Camera(0.0f, 0.0f, 800.f, 0.f, 0.f);
+    camera = new Camera(0.0f, 0.0f, 2000.f, 0.f, 0.f);
 }
     
 void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glLoadIdentity();
-    
-    //glRotatef(180.f, 1.f, 0.f, 0.f);
     
     camera->lookThrough();
     
@@ -224,7 +222,6 @@ void keyPressed (unsigned char key, int x, int y) {
 
 int main(int argc, char **argv)
 {
-
   /*parsePoints("../data/hw4.heights", &x, &y, &z, n);
     cout << "Parsed points, found " << n << " points" << endl;
     copyCoordinatesToGraph(n, &x[0], &y[0], &z[0], 1, &g);
@@ -235,7 +232,7 @@ int main(int argc, char **argv)
     parseTour("../data/hw4.tour", &tour);
     cout << "Parsed tour, found " << tour.size()/3 << " sights" << endl;*/
 
-    terrain = new Terrain("../src/sample.mesh","../src/sample.triangles");
+    terrain = new Terrain("../src/sample.mesh3","../src/sample.triangles3");
     terrain->print();
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);

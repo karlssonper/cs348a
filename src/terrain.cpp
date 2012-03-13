@@ -133,7 +133,7 @@ void Terrain::renderTriangles()
 {
   /*glEnableClientState(GL_VERTEX_ARRAY);
   glEnableClientState(GL_NORMAL_ARRAY);
-  glVertexPointer(3, GL_INT, 0, &(points[0].x));
+  glVertexPointer(3, GL_FLOAT, 0, &(points[0].x));
   glNormalPointer(GL_FLOAT, 0, &(normals[0].x));
   glDrawElements(GL_TRIANGLES, triangles.size()*3, GL_UNSIGNED_INT,
 		 &(triangles[0].x));
@@ -212,7 +212,6 @@ void Terrain::ReadTerrain (char* fileName)
   FILE *fp;
   int ret = 5;
   fp = fopen (fileName, "r");
-  printf("file fp  (%d)\n",fp);
   int x, y, z, index;
   // skip first line
   while (ret == 5)
@@ -230,7 +229,6 @@ void Terrain::ReadTriangles(char* fileName)
   FILE *fp;
   int ret = 3;
   fp = fopen (fileName, "r");
-  printf("file fp  (%d)\n",fp);
   int x,y,z,index;
   // skip first line
   while (true)

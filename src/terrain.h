@@ -17,15 +17,6 @@ class Point
   int z;
 };
 
-/*struct Tri
-{
-  Tri(Point _p1, Point _p2, Point _p3){p1=_p1;p2=_p2;p3=_p3;}
-  Point p1;
-  Point p2;
-  Point p3;
-};
-*/
-
 class Terrain
 {
  public:
