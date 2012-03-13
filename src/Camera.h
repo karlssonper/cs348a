@@ -16,34 +16,30 @@ public:
     void pitchInc(float _p) { pitch += _p; }
 
     void walkForward(float _d) {
-        //posX -= _d * sin((M_PI/180.f)*yaw);
-        //posY += _d * sin((M_PI/180.f)*pitch);
-        //posZ += _d * cos((M_PI/180.f)*yaw);
-        posY += _d * sin((M_PI/180.f)*(yaw));
-        posZ -= _d * sin((M_PI/180.f)*(pitch));
-        posX -= _d * cos((M_PI/180.f)*(yaw));
+        posX -= _d * sin((M_PI/180.f)*yaw);
+        posY += _d * sin((M_PI/180.f)*pitch);
+        posZ += _d * cos((M_PI/180.f)*yaw);
     }
 
     void walkBackwards(float _d) { walkForward(-_d); }
 
     void strafeLeft(float _d) {
-        //posX -= _d * sin((M_PI/180.f)*(yaw-90.f));
-        //posZ += _d * cos((M_PI/180.f)*(yaw-90.f));
-        posY -= _d * sin((M_PI/180.f)*(yaw));
-        posX += _d * cos((M_PI/180.f)*(yaw));
+        posX -= _d * sin((M_PI/180.f)*(yaw-90.f));
+        posZ += _d * cos((M_PI/180.f)*(yaw-90.f));
     }
 
     void strafeRight(float _d) { strafeLeft(-_d); }
 
     void lookThrough() {
         glLoadIdentity();
-	gluLookAt(posX,posY,posZ,
+	/*gluLookAt(posX,posY,posZ,
 		  posX+1,posY+1,posZ-1,
-		  0,0,1);
-        /*glRotatef(-90.f, 1.f, 0.f, 0.f);
+		  0,0,1);*/
+        //glRotatef(180.f, 0.f, 0.f, 1.f);
         glRotatef(pitch, 1.f, 0.f, 0.f);
-        glRotatef(yaw, 0.f, 0.f, 1.f);
-        glTranslatef(posX, posY, posZ);*/
+        glRotatef(yaw, 0.f, 1.f, 0.f);
+        glTranslatef(posX, posY, posZ);
+        glRotatef(-90, 1.f, 0.f, 0.f);
     }
 
     float posX, posY, posZ;

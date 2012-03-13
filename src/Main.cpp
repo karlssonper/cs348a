@@ -13,6 +13,7 @@ extern "C" {
 #include <math.h>
 #include "Camera.h"
 #include "terrain.h"
+#include "SightPath.h"
 
 using namespace std;
 
@@ -22,98 +23,39 @@ int height = 600;
 vector<int> x;
 vector<int> y;
 vector<int> z;
-vector<float> tour;
+vector<Vector3> tour;
+vector<Vector3> controlPoints;
 triangleList *tl;
 char *g;
 int n, tn;
 Camera* camera;
+int mouseX, mouseY;
 
 Terrain *terrain;
-
-/*void calculateNormal(float x1,  float y1,  float z1,
-                     float x2,  float y2,  float z2, 
-                     float x3,  float y3,  float z3,
-                     float *nx, float *ny, float *nz) {
-    float Qx,Qy,Qz,Px,Py,Pz, nxx, nyy, nzz, norm;
-    Qx = x2-x1;
-    Qy = y2-y1;
-    Qz = z2-z1;
-    Px = x3-x2;
-    Py = y3-y2;
-    Pz = z3-z2;
-    nxx = Qy*Pz - Qz*Py;
-    nyy = -Qx*Pz + Qz*Px;
-    nzz = Qx*Py - Px*Qy;
-    norm = sqrt(nxx*nxx+nyy*nyy+nzz*nzz);
-    *nx = nxx / norm;
-    *ny = nyy / norm;
-    *nz = nzz / norm;
-    }*/
+SightPath * sightPath;
 
 void drawTriangles(triangleList *tl,
                    int *x,
                    int *y,
                    int *z) {
 
-    glColor3f(1.f, 1.f, 1.f);
-
-    /*    for (int i=0; i<tl->nofTriangles; ++i) {
-        glBegin(GL_TRIANGLES);
-        float nx, ny, nz;
-        calculateNormal(x[tl->v[i][0]], y[tl->v[i][0]], z[tl->v[i][0]],
-                        x[tl->v[i][1]], y[tl->v[i][1]], z[tl->v[i][1]],
-                        x[tl->v[i][2]], y[tl->v[i][2]], z[tl->v[i][2]],
-                        &nx, &ny, &nz);
-        glNormal3f(nx,ny,nz);
-        glVertex3f(x[tl->v[i][0]], y[tl->v[i][0]], z[tl->v[i][0]]);
-        glVertex3f(x[tl->v[i][1]], y[tl->v[i][1]], z[tl->v[i][1]]);
-        glVertex3f(x[tl->v[i][2]], y[tl->v[i][2]], z[tl->v[i][2]]);
-        glEnd();
-	}*/
-    terrain->renderTriangles();
+  glColor3f(1.f, 1.f, 1.f);
+  terrain->renderTriangles();
 }
 
-void drawTour(vector<float> *tour) {
-    glColor3f(1.f, 0.f, 0.f);
-    for (int i=0; i<tour->size()/3; ++i) {
-        glPushMatrix();
-        glTranslatef(tour->at(3*i), tour->at(3*i+1), tour->at(3*i+2));
-        glutSolidSphere(50, 50, 50);
-        glPopMatrix();
-    }
+void drawTour(vector<Vector3> *tour) {
+  glColor3f(1.f, 0.f, 0.f);
+  for (int i=0; i<tour->size(); ++i) {
+    glPushMatrix();
+    glTranslatef(tour->at(i).x, tour->at(i).y, tour->at(i).z);
+    glutSolidSphere(50, 50, 50);
+    glPopMatrix();
+  }
 }
 
-void parsePoints(string filename,
-                 vector<int> *x, 
-                 vector<int> *y, 
-                 vector<int> *z,
-                 int &n) {
-    n = 0;
-    string temp;
-    int xtemp, ytemp, ztemp;
-    ifstream infile;
-    infile.open(filename.c_str());
-    if (infile.is_open()) {
-        while (!infile.eof()) {
-            infile >> temp;
-            if (infile.eof()) break;
-            infile >> xtemp;
-            infile >> ytemp;
-            infile >> ztemp;
-            x->push_back(xtemp);
-            y->push_back(ytemp);
-            z->push_back(ztemp);
-            n++;
-            cout << xtemp << " " << ytemp << " " << ztemp << endl;
-        }
-    } else {
-        cout << filename << " could not be opened" << endl;
-    }
-    infile.close();   
-}
 
 void parseTour(string filename,
-               vector<float> *tour) {
+               vector<Vector3> *tour) {
     float xtemp, ytemp, ztemp;
     ifstream infile;
     infile.open(filename.c_str());
@@ -123,9 +65,7 @@ void parseTour(string filename,
             infile >> ytemp;
             infile >> ztemp;
             if (infile.eof()) break;
-            tour->push_back(xtemp);
-            tour->push_back(ytemp);
-            tour->push_back(ztemp);
+            tour->push_back(Vector3(xtemp,ytemp,ztemp));
         }
     } else {
         cout << filename << " could not be opened" << endl;
@@ -143,7 +83,7 @@ void initGL() {
     glViewport(0, 0, width, height);
     gluPerspective(60.f, width/height, 0.1f, 100000.f);
     glMatrixMode(GL_MODELVIEW);
-    camera = new Camera(0.0f, 0.0f, 800.f, 0.f, 0.f);
+    camera = new Camera(0.0f, 0.0f, 2000.f, 0.f, 0.f);
 }
     
 void display() {
@@ -151,11 +91,8 @@ void display() {
 
     glLoadIdentity();
     
-    //glRotatef(180.f, 1.f, 0.f, 0.f);
-    
     camera->lookThrough();
-    
-   
+       
     glDisable(GL_LIGHTING);
     glBegin(GL_LINES);
         glColor3f(1.f, 0.f, 0.f);
@@ -173,15 +110,12 @@ void display() {
     GLfloat lightPos[] = { 0.0, -1.0, 1.0, 0.0 };
     glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
 
-    //drawTerrain();
     drawTriangles(tl, &x[0], &y[0], &z[0]);
 
     glDisable(GL_LIGHTING);
     drawTour(&tour);
     glEnable(GL_LIGHTING);
 
-    //glFlush();
-    //glutPostRedisplay();
     glutSwapBuffers();
 }
 
@@ -195,18 +129,6 @@ void reshape(int x, int y) {
 
 void keyPressed (unsigned char key, int x, int y) {  
     switch (key) {
-    case 'r':
-        camera->pitchInc(-3.f);
-        break;
-    case 'f':
-        camera->pitchInc(3.f);
-        break;
-    case 'q':
-        camera->yawInc(-3.f);
-        break;
-    case 'e':
-        camera->yawInc(3.f);
-        break;
     case 'w':
         camera->walkForward(100.f);
         break;
@@ -222,21 +144,45 @@ void keyPressed (unsigned char key, int x, int y) {
     }
 }  
 
+void mouseFunc(int x,int y)
+{
+    int dx = x - mouseX;
+    int dy = y - mouseY;
+    mouseX = x;
+    mouseY = y;
+    camera->yawInc(1.6*dx);
+    camera->pitchInc(1.6*dy);
+}
+
+void mouseMoveFunc(int x,int y)
+{
+    mouseX = x;
+    mouseY = y;
+}
+
 int main(int argc, char **argv)
 {
-
   /*parsePoints("../data/hw4.heights", &x, &y, &z, n);
     cout << "Parsed points, found " << n << " points" << endl;
     copyCoordinatesToGraph(n, &x[0], &y[0], &z[0], 1, &g);
     planeSweep(g);
     delaunay1(g);
     copyGraphToListOfTriangles(g, &tl);
-
+*/
     parseTour("../data/hw4.tour", &tour);
-    cout << "Parsed tour, found " << tour.size()/3 << " sights" << endl;*/
+    cout << "Parsed tour, found " << tour.size()/3 << " sights" << endl;
 
-    terrain = new Terrain("../src/sample.mesh","../src/sample.triangles");
+    terrain = new Terrain("../src/sample.mesh3","../src/sample.triangles3");
+    printf("terrain loaded\n");
+    sightPath = new SightPath(terrain, tour);
+    printf("sight path loaded\n");
+    sightPath->createConstraintTangents();
+    printf("constraint trangents made\n");
+    sightPath->createControlPoints();
+    printf("control points created\n");
+    controlPoints = sightPath->controlPoints();
     terrain->print();
+    printf("everything made\n");
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
     glutInitWindowSize(width, height);
@@ -246,6 +192,8 @@ int main(int argc, char **argv)
     glutDisplayFunc(display);
     glutIdleFunc(display);
     glutKeyboardFunc(keyPressed);
+    glutMotionFunc(mouseFunc);
+    glutPassiveMotionFunc(mouseMoveFunc);
 
     glutMainLoop();
     return 0;

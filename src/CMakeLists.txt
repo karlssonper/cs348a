@@ -6,7 +6,7 @@ INCLUDE_DIRECTORIES(../minmaxer/source.triangulation)
 
 LINK_DIRECTORIES(/home/per/Dev/cs348a/project.git/lib)
 
-ADD_EXECUTABLE(main Triangle IntersectionInfo Ray BezierCurve terrain Main)
+ADD_EXECUTABLE(main Triangle IntersectionInfo Ray BezierCurve terrain  SightPath Main)
 
 ADD_EXECUTABLE(testmain Triangle IntersectionInfo Ray BezierCurve terrain TestMain)
 

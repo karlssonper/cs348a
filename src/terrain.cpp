@@ -20,9 +20,10 @@ Terrain::Terrain(char* fileVertices, char* fileTriangles)
   getBounds(&scratch,&scratch,
 	    &scratch,&scratch,&scratch,&scratch);
   constructGrid(16,16);
+  CreateColors();
 }
 
-Point Terrain::getGrid(Vector3 val)
+Point Terrain::getGrid(Vector3 val) const
 {
   float xStride = (maxBound.x-minBound.x) / numGridCols;
   float yStride = (maxBound.y-minBound.y) / numGridRows;
@@ -58,7 +59,7 @@ inline int max(int a, int b)
   return a > b ? a : b;
 }
 
-std::vector<Triangle> Terrain::getTriangles(Vector3 p1, Vector3 p2)
+std::vector<Triangle> Terrain::getTriangles(Vector3 p1, Vector3 p2) const
 {
   std::vector<Triangle> tri;
   // determine candidate grid cells
@@ -67,19 +68,19 @@ std::vector<Triangle> Terrain::getTriangles(Vector3 p1, Vector3 p2)
   std::vector<Point> gridCells;  
   int minX = max(0, min(grid1.x-1, grid2.x-1));
   int minY = max(0, min(grid1.y-1, grid2.y-1));
-  int maxX = min(numGridCols, max(grid1.x+1, grid2.x+1));
-  int maxY = min(numGridRows, max(grid1.y+1, grid2.y+1));
-  printf("min(%i,%i) max(%i,%i)\n",minX,minY,maxX,maxY);
+  int maxX = min(numGridCols-1, max(grid1.x+1, grid2.x+1));
+  int maxY = min(numGridRows-1, max(grid1.y+1, grid2.y+1));
+  //printf("min(%i,%i) max(%i,%i)\n",minX,minY,maxX,maxY);
+  int numElements = 0;
   for (int col = minX; col <= maxX; col++)
     {
       for (int row = minY; row <= maxY; row++)
 	{
 	  Point gridCell = Point(col,row,0);
 	  gridCells.push_back(gridCell);
+	  numElements += grid[gridCell.y*numGridCols+gridCell.x].size();
 	} 
     }
-  if (gridCells.size() > 9)
-    printf(" lots of grid cells\n");
   // add all the elements in the grid cells to the result vector
   for (int i = 0; i < gridCells.size(); i++)
     {
@@ -133,7 +134,7 @@ void Terrain::renderTriangles()
 {
   /*glEnableClientState(GL_VERTEX_ARRAY);
   glEnableClientState(GL_NORMAL_ARRAY);
-  glVertexPointer(3, GL_INT, 0, &(points[0].x));
+  glVertexPointer(3, GL_FLOAT, 0, &(points[0].x));
   glNormalPointer(GL_FLOAT, 0, &(normals[0].x));
   glDrawElements(GL_TRIANGLES, triangles.size()*3, GL_UNSIGNED_INT,
 		 &(triangles[0].x));
@@ -212,7 +213,6 @@ void Terrain::ReadTerrain (char* fileName)
   FILE *fp;
   int ret = 5;
   fp = fopen (fileName, "r");
-  printf("file fp  (%d)\n",fp);
   int x, y, z, index;
   // skip first line
   while (ret == 5)
@@ -230,7 +230,6 @@ void Terrain::ReadTriangles(char* fileName)
   FILE *fp;
   int ret = 3;
   fp = fopen (fileName, "r");
-  printf("file fp  (%d)\n",fp);
   int x,y,z,index;
   // skip first line
   while (true)
@@ -276,5 +275,20 @@ void Terrain::CreateNormals()
 		      z.x, z.y, z.z,
 		      &nx, &ny, &nz);
       normals.push_back(Vector3(nx,ny,nz));
+    }
+}
+
+// taken from http://www.lighthouse3d.com/tutorials/glsl-tutorial/setup-for-glsl-example/
+void Terrain::CreateColors()
+{
+  float minZ = minBound.z;
+  float maxZ = maxBound.z;
+  float range = maxZ - minZ;
+  float scale;
+  for (unsigned int i = 0; i < points.size(); i++)
+    {
+      Vector3 v = points[i];
+      scale = (v.z-minZ) / range;
+      heights.push_back(scale);
     }
 }
