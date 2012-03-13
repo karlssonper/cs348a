@@ -6,14 +6,18 @@
  */
 
 #include "SightPath.h"
+#include "Ray.h"
+#include "IntersectionInfo.h"
+#include "terrain.h"
+#include <limits>
 
-SightPath::SightPath(const std::vector<Vector3> & pos,
-          const std::vector<int> &idx,
-          const std::vector<Vector3> &sights)
+SightPath::SightPath(const Terrain * terrain,
+          const std::vector<Vector3> &sights) : terrain_(terrain)
 {
     sights_.resize(sights.size());
     for (int i = 0; i < sights.size(); ++i) {
         sights_[i].pos = sights[i];
+        sights_[i].pos.z += D;
     }
 }
 
@@ -44,6 +48,7 @@ void SightPath::createConstraintTangents()
 
 void SightPath::createControlPoints()
 {
+    controlPoints_.clear();
     for (int i = 0; i < sights_.size() - 1; ++i){
         solve(sights_[i],sights_[i + 1]);
     }
@@ -72,7 +77,7 @@ void SightPath::solve (Sight sight0, Sight sight1)
     do {
         cp0 = sight0.pos + sight0.tangent * CP0_ITER/scale;
         scale /= 2.f;
-        //hit = intersection(sight0.pos,cp0);
+        hit = intersection(sight0.pos,cp0);
     } while (hit);
 
     Vector3 mp = (cp0 + sight1.pos)/2.0f;
@@ -83,7 +88,7 @@ void SightPath::solve (Sight sight0, Sight sight1)
     hit = true;
     do {
         mp = mp + mp_dir;
-        //hit = intersection(cp0,mp);
+        hit = intersection(cp0,mp);
     } while (hit);
 
     Vector3 v0 = cp0;
@@ -109,4 +114,15 @@ Vector3 SightPath::lineIntersect(Vector3 v0,
     if (den == 0.0f) std::cerr << "AAAH LINEINTERSECT ERROR!!";
     float t2 = (v1.x*(v2.y-v0.y) - v1.y * (v2.x-v0.x)/den);
     return v2 + v3*t2;
+}
+
+bool SightPath::intersection(const Vector3 & source, const Vector3 &dest)
+{
+    std::vector<Triangle> triangles = terrain_->getTriangles(source,dest);
+    Ray r(source,dest-source,0, std::numeric_limits<float>::max());
+    for (int i = 0; i < triangles.size(); ++i) {
+        IntersectionInfo ii = triangles[i].rayIntersect(r);
+        if (ii.hit) return true;
+    }
+    return false;
 }
