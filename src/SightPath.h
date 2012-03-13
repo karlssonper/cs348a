@@ -12,7 +12,7 @@
 #include "MathEngine.h"
 
 #define CP0_ITER 1.0f
-
+#define D 100.f
 class Terrain;
 class SightPath
 {

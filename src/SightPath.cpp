@@ -17,6 +17,7 @@ SightPath::SightPath(const Terrain * terrain,
     sights_.resize(sights.size());
     for (int i = 0; i < sights.size(); ++i) {
         sights_[i].pos = sights[i];
+        sights_[i].pos.z += D;
     }
 }
 
