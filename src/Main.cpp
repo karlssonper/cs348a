@@ -44,6 +44,8 @@ bool bDrawCurve = true;
 bool bDrawControlPoints = true;
 bool bDrawControlPolygon = false;
 bool bDrawControlPolygonExt = false;
+bool bDrawControlPolyFill = false;
+bool wasd[4] = {false,false,false,false};
 
 void reshape(int x, int y);
 
@@ -118,6 +120,12 @@ void initGL() {
 }
     
 void display() {
+    if (wasd[0]) camera->walkForward(20.f);
+    if (wasd[1]) camera->walkBackwards(20.f);
+    if (wasd[2]) camera->strafeLeft(10.f);
+    if (wasd[3]) camera->strafeRight(10.f);
+
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glLoadIdentity();
@@ -157,8 +165,11 @@ void display() {
     if (bDrawControlPolygon)
         BezierCurve::renderCtrlPoly(controlPoints,4.f);
 
-    if(bDrawControlPolygon)
-        BezierCurve::renderCtrlPtsExt(controlPoints,4.f);
+    if(bDrawControlPolygonExt)
+        BezierCurve::renderCtrlPolyExt(controlPoints,4.f);
+
+    if (bDrawControlPolyFill)
+        BezierCurve::renderCtrlPolyFill(controlPoints);
 
     drawMinimap();
     glEnable(GL_LIGHTING);
@@ -194,10 +205,12 @@ void printInfo()
          "  |    Press '4' - Toggle Control Points                  |\n"
          "  |    Press '5' - Toggle Control Polygon                 |\n"
          "  |    Press '6' - Toggle Control Polygon Extended        |\n"
+         "  |    Press '7' - Toggle Control Polygon Filled          |\n"
          "  |                                                       |\n"
          "  |    Press 'esc' - Quit                                 |\n"
          "  ---------------------------------------------------------"
         << std::endl;
+
 }
 
 void keyPressed (unsigned char key, int x, int y) {  
@@ -221,20 +234,40 @@ void keyPressed (unsigned char key, int x, int y) {
     case '6':
         bDrawControlPolygonExt = !bDrawControlPolygonExt;
         break;
+    case '7':
+        bDrawControlPolyFill = !bDrawControlPolyFill;
+        break;
     case 'w':
-        camera->walkForward(1000.f);
+        wasd[0] = true;
         break;
     case 's':
-        camera->walkBackwards(1000.f);
+        wasd[1] = true;
         break;
     case 'a':
-        camera->strafeLeft(100.f);
+        wasd[2] = true;
         break;
     case 'd':
-        camera->strafeRight(100.f);
+        wasd[3] = true;
         break;
     }
-}  
+}
+
+void keyReleased (unsigned char key, int x, int y) {
+    switch (key) {
+        case 'w':
+            wasd[0] = false;
+            break;
+        case 's':
+            wasd[1] = false;
+            break;
+        case 'a':
+            wasd[2] = false;
+            break;
+        case 'd':
+            wasd[3] = false;
+            break;
+    }
+}
 
 void mouseFunc(int x,int y)
 {
@@ -285,6 +318,7 @@ int main(int argc, char **argv)
     glutDisplayFunc(display);
     glutIdleFunc(display);
     glutKeyboardFunc(keyPressed);
+    glutKeyboardUpFunc(keyReleased);
     glutMotionFunc(mouseFunc);
     glutPassiveMotionFunc(mouseMoveFunc);
     printInfo();
