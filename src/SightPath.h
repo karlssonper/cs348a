@@ -11,10 +11,7 @@
 #include <vector>
 #include "MathEngine.h"
 
-struct Sight {
-    Vector3 pos;
-    Vector3 tangent;
-};
+#define CP0_ITER 1.0f
 
 class SightPath
 {
@@ -25,12 +22,20 @@ public:
 
     void createConstraintTangents();
     void createControlPoints();
+    void removeSight(int i);
     const std::vector<Vector3> & controlPoints() const { return controlPoints_;};
+    std::vector<Vector3> sights() const;
 private:
+    struct Sight {
+        Vector3 pos;
+        Vector3 tangent;
+    };
     std::vector<Sight> sights_;
     std::vector<Vector3> controlPoints_;
 
     void solve (Sight sight0, Sight sight1);
+    Vector3 tangent(Vector3 p0, Vector3 p1);
+    Vector3 lineIntersect(Vector3 v0, Vector3 v1, Vector3 v2, Vector3 v3) const;
 };
 
 #endif /* SIGHTPATH_H_ */
