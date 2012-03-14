@@ -1,5 +1,9 @@
 #include "BezierCurve.h"
 #include <GL/glut.h>
+#include "limits"
+#include "Triangle.h"
+#include "Ray.h"
+#include "IntersectionInfo.h"
 
 BezierCurve::BezierCurve(Vector3 _p1, Vector3 _p2, Vector3 _p3) 
     : p1(_p1), p2(_p2), p3(_p3) {}
@@ -159,4 +163,43 @@ float BezierCurve::curvature(const Vector3 &_p1,
 						     float _t) {
 								 
 								 
+}
+
+float BezierCurve::minDistance(const Vector3 &_p1,
+							   const Vector3 &_p2,
+							   const Vector3 &_p3,
+							   int _steps,
+							   const Terrain *_terrain) {
+	float min = std::numeric_limits<float>::max();	
+	for (int i=0; i<_steps; ++i) {
+        float t = (float)i/(float)(_steps-1);
+		Vector3 p = evaluate(_p1, _p2, _p3, t);
+		std::vector<Triangle> triangles = _terrain->getTriangles(p,p);
+		Vector3 dir = Vector3(0.f, 0.f, -1.f);
+		dir.normalize();
+		Ray r(p, dir, 0, 1.0f);
+		for (int i = 0; i < triangles.size(); ++i) {
+			IntersectionInfo ii = triangles[i].rayIntersect(r);
+			if (ii.hit) {
+				if (ii.t < min) {
+					min = ii.t;
+				}
+			}
+		}
+    }
+    return min;							
+}
+
+float BezierCurve::minDistance(const std::vector<Vector3> &_cpts,
+							   int _steps,
+							   const Terrain *_terrain) {
+	float min = std::numeric_limits<float>::max();					   
+	for (int i=0; i<_cpts.size()-2; i=i+2) {
+        Vector3 p1 = _cpts.at(i);
+        Vector3 p2 = _cpts.at(i+1);
+        Vector3 p3 = _cpts.at(i+2);
+        float temp = minDistance(p1, p2, p3, _steps, _terrain);
+        if (temp < min) min = temp;
+    }
+    return min;							   
 }
