@@ -180,7 +180,7 @@ void addSight()
     std::cout << "........\nAdding sight at " << x
             << ", " << y << ", " << z << std::endl;
 
-    std::cout << "Please enter after which #sight it should be added(int): ";
+    std::cout << "Please enter before which #sight it should be added(int): ";
     int idx;
     std::cin >> idx;
     if (idx <0 || idx > controlPoints.size()-1) {
