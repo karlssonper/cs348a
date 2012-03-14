@@ -59,18 +59,18 @@ Our algorithm constructs the path by iterating through the POIs and locally cons
 
 ========== Part E: Tours for Unordered Sites ================
 
-Since our algorithm for planning a smooth tour described in Part B is guaranteed to work between any sight, our method to find the optimal path for all sights uses euclidean distance. The method can be described the following way:
+Since our algorithm for planning a smooth tour described in Part B is guaranteed to work between any sights, our method to find the optimal path for all sights uses euclidean distance. The method can be described in the following way:
 
   pick a starting point A
   add A to a ordered list
   find point B with the minimum distance from point A
   add B to the ordered list
-  find point C with the minimum distance to point B from points who are not yet in the ordered list
+  find point C with the minimum distance to point B from points which are not yet in the ordered list
   ..
   ..
   until all points have been added to the ordered list
 
-We simply try all sight points as starting points and the one who produces the smallest total length of the sight tour is picked as the final starting point. This method is not close to any global solution of the general Traveling Salesman Problem but it works very well for the given data in this assignment. The major drawback of this method is that we can be unlucky and in the end only have remaining points that are very far from each other.
+We simply try all sights as starting points and the one who produces the smallest total length of the sight tour is picked as the final starting point. This method is not close to any global solution of the general Traveling Salesman Problem but it works very well for the given data in this assignment. The major drawback of this method is that we can be unlucky and in the end only have remaining points that are very far from each other.
 
 ========== Part F: Metrics ==================================
 
