@@ -171,7 +171,8 @@ void removeSight()
     }
     std::cout << "........\nRemoving sight #" << idx << std::endl;
     //remove!
-
+    sightPath2->removeSight(idx);
+    controlPoints2 = sightPath2->controlPoints();
     wasd[0] = false;
     wasd[1] = false;
     wasd[2] = false;

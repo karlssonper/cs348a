@@ -140,20 +140,28 @@ void Terrain::renderTriangles()
 		 &(triangles[0].x));
   glDisableClientState(GL_NORMAL_ARRAY);
   glDisableClientState(GL_VERTEX_ARRAY);*/
+  //glDisable(GL_LIGHTING);
+  //glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+  //glEnable(GL_COLOR_MATERIAL);
+  glDisable(GL_LIGHTING);
   glBegin(GL_TRIANGLES);
   for (unsigned int i = 0; i < triangles.size(); i++)
     {
       Point tri = triangles[i];
-      Vector3 x = points[tri.x];
-      Vector3 y = points[tri.y];
-      Vector3 z = points[tri.z];
-      Vector3 n = normals[i];
-      glNormal3f(n.x, n.y, n.z);
+      Vector3 x = points[tri.x]; Vector3 cx = colors[tri.x];
+      Vector3 y = points[tri.y]; Vector3 cy = colors[tri.x];
+      Vector3 z = points[tri.z]; Vector3 cz = colors[tri.x];
+      Vector3 n = normals[i];      
+      //glNormal3f(n.x, n.y, n.z);
+      glColor3f(cx.x, cx.y, cx.z);
       glVertex3f(x.x, x.y, x.z);
+      glColor3f(cy.x, cy.y, cy.z);
       glVertex3f(y.x, y.y, y.z);
+      glColor3f(cz.x, cz.y, cz.z);
       glVertex3f(z.x, z.y, z.z);
     }
     glEnd();
+    glEnable(GL_LIGHTING);
 }
 
 void Terrain::print()
@@ -278,6 +286,13 @@ void Terrain::CreateNormals()
     }
 }
 
+Vector3 blend(Vector3 c1, Vector3 c2, float f1, float f2, float amount)
+{
+  float blendFac = (amount-f1) / (f2-f1);
+  Vector3 diff = c2-c1;
+  return c1 + diff*blendFac;
+}
+
 // taken from http://www.lighthouse3d.com/tutorials/glsl-tutorial/setup-for-glsl-example/
 void Terrain::CreateColors()
 {
@@ -285,12 +300,36 @@ void Terrain::CreateColors()
   float maxZ = maxBound.z;
   float range = maxZ - minZ;
   float scale;
-  int color;
+  Vector3 color;
+  Vector3 colorTable[] = {Vector3(0,0,255)/255.f,
+			Vector3(0,128,255)/255.f,
+			Vector3(240,240,64)/255.f,
+			Vector3(32,160,0)/255.f,
+			Vector3(224,224,0)/255.f,
+			Vector3(128,128,128)/255.f,
+			Vector3(255,255,255)/255.f};
+  float colorCuts[] = {-0.25f,
+		       0.01f,
+		       0.0625f,
+		       0.125f,
+		       0.375f,
+		       0.75f,
+		       2.f};
+  int numColors = 7;
+  
   colors.clear();
   for (unsigned int i = 0; i < points.size(); i++)
     {
       Vector3 v = points[i];
       scale = (v.z-minZ) / range;
+      for (unsigned int j = 0; j < numColors; j++)
+	{
+	  if (scale <= colorCuts[j])
+	    {
+	      color = blend(colorTable[j-1], colorTable[j],colorCuts[j-1],colorCuts[j],scale);
+	      break;
+	    }
+	}
       colors.push_back(color);
     }
 }

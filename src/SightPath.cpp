@@ -242,6 +242,7 @@ void SightPath2::addSight(Vector3 pos, int prevSightIdx)
 {
   if (prevSightIdx < 0 || prevSightIdx >= numSights()-1)
     return;
+  pos = pos + Vector3(0,0,D);
   sights_.insert(sights_.begin()+prevSightIdx,pos);
   siteSegments_.insert(siteSegments_.begin()+prevSightIdx,SiteSegment());
   midpoints_.insert(midpoints_.begin()+prevSightIdx,Vector3());

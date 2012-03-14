@@ -31,7 +31,7 @@ class Terrain
   std::vector<Point> triangles;
   std::vector<Vector3> normals;
   std::vector<float> heights;
-  std::vector<int> colors;
+  std::vector<Vector3> colors;
   std::vector<std::vector<int> > grid;
 
  private:
