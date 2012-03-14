@@ -1,9 +1,9 @@
-extern "C" {
+/*extern "C" {
     #include <triangulation.h>
     #include <planeSweep.h>
     #include <delaunay.h>
     #include <angle.h>
-}
+}*/
 
 #include <GL/glut.h>
 #include <vector>

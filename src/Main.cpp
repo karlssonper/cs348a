@@ -1,9 +1,10 @@
-extern "C" {
+/*extern "C" {
     #include <triangulation.h>
     #include <planeSweep.h>
     #include <delaunay.h>
     #include <angle.h>
-}
+    triangleList *tl;
+}*/
 
 #include <GL/glut.h>
 #include <vector>
@@ -33,7 +34,6 @@ vector<Vector3> optimalTour;
 vector<Vector3> tourColors;
 vector<Vector3> controlPoints1;
 vector<Vector3> controlPoints2;
-triangleList *tl;
 char *g;
 int n, tn;
 Camera* camera;
