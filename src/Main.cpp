@@ -546,7 +546,7 @@ int main(int argc, char **argv)
     srand(0);
     parseTour("../data/hw4.tour", &tour);
     cout << "Parsed tour, found " << tour.size()/3 << " sights" << endl;
-    tour = optimalSightPath(tour);
+    //tour = optimalSightPath(tour);
 
     terrain = new Terrain("../src/sample.mesh3","../src/sample.triangles3");
     printf("terrain loaded\n");
