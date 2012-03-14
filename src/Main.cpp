@@ -61,6 +61,57 @@ void drawTriangles()
   terrain->renderTriangles();
 }
 
+void addSight()
+{
+    std::cout<<"\n#############################\n"
+                 "#                           #\n"
+                 "#         ADD SIGHT         #\n"
+                 "#                           #\n"
+                 "#############################\n\n"
+                 "Please enter coords(float float float): ";
+    float x,y,z;
+    std::cin >> x>>y>>z;
+    std::cout << "........\nAdding sight at " << x
+            << ", " << y << ", " << z << std::endl;
+
+    std::cout << "Please enter after which #sight it should be added(int): ";
+    int idx;
+    std::cin >> idx;
+    if (idx <0 || idx > controlPoints.size()-1) {
+        std::cerr << "Bad Index!" << std::endl;
+        return;
+    }
+    //add!
+
+    wasd[0] = false;
+    wasd[1] = false;
+    wasd[2] = false;
+    wasd[3] = false;
+}
+
+void removeSight()
+{
+    std::cout<<"\n#############################\n"
+                 "#                           #\n"
+                 "#       REMOVE SIGHT        #\n"
+                 "#                           #\n"
+                 "#############################\n\n"
+                 "Please enter idx(int): ";
+    int idx;
+    std::cin >> idx;
+    if (idx <0 || idx > controlPoints.size()-1) {
+        std::cerr << "Bad Index!" << std::endl;
+        return;
+    }
+    std::cout << "........\nRemoving sight #" << idx << std::endl;
+    //remove!
+
+    wasd[0] = false;
+    wasd[1] = false;
+    wasd[2] = false;
+    wasd[3] = false;
+}
+
 void drawTour(vector<Vector3> *tour) {
   for (int i=0; i<tour->size(); ++i) {
     glPushMatrix();
@@ -106,20 +157,6 @@ void drawMinimap()
   glDisable(GL_SCISSOR_TEST);
   glDisable(GL_LIGHTING);
 }
-
-void removePoi()
-{
-  currentPoi = currentPoi % sightPath2->numSights();
-  printf("Removing POI(%i)\n",currentPoi);
-  sightPath2->removeSight(currentPoi);
-  controlPoints = sightPath2->controlPoints();
-}
-
-void cyclePoi()
-{
-  currentPoi = (currentPoi+1) % sightPath2->numSights();  
-}
-
 void parseTour(string filename,
                vector<Vector3> *tour) {
     float xtemp, ytemp, ztemp;
@@ -165,7 +202,7 @@ void initGL() {
 void drawCurves()
 {
   if(bDrawCurve)
-    BezierCurve::renderCurves(controlPoints,5000,3.f);
+    BezierCurve::renderCurves(controlPoints,100,3.f);
   
   if (bDrawControlPoints)
     BezierCurve::renderCtrlPts(controlPoints, 60);
@@ -185,7 +222,7 @@ void drawCurves()
 }
     
 void display() {
-  float scale = 10.f;
+  float scale = 1.f;
     if (wasd[0]) camera->walkForward(20.f*scale);
     if (wasd[1]) camera->walkBackwards(20.f*scale);
     if (wasd[2]) camera->strafeLeft(10.f*scale);
@@ -197,19 +234,6 @@ void display() {
     glLoadIdentity();
     
     camera->lookThrough();
-       
-    glDisable(GL_LIGHTING);
-    /*glBegin(GL_LINES);
-        glColor3f(1.f, 0.f, 0.f);
-        glVertex3f(0.f, 0.f, 0.f);
-        glVertex3d(100000.f, 0.f, 0.f);
-        glColor3f(0.f, 1.f, 0.f);
-        glVertex3f(0.f, 0.f, 0.f);
-        glVertex3d(0.f, 100000.f, 0.f);
-        glColor3f(0.f, 0.f, 1.f);
-        glVertex3f(0.f, 0.f, 0.f);
-        glVertex3d(0.f, 0.f, 100000.f);
-    glEnd();*/
     glEnable(GL_LIGHTING);
     GLfloat lightPos[] = { 0.0, -1.0, 1.0, 0.0 };
     glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
@@ -221,8 +245,6 @@ void display() {
 
     drawCurves();
     //drawMinimap();
-
-    glEnable(GL_LIGHTING);
 
     glutSwapBuffers();
 }
@@ -256,8 +278,8 @@ void printInfo()
          "  |    Mouse       - Rotate Camera view                   |\n"
          "  |    Press 'w/s' - Walk forward/backwards               |\n"
          "  |    Press 'a/d' - Strafe left/right                    |\n"
-         "  |    Press 'c'   - Cycle Point of Interest              |\n"
-         "  |    Press 'r'   - Remove Point of Interest             |\n"
+         "  |    Press 'c'   - Add New Sight                        |\n"
+         "  |    Press 'r'   - Remove Sight                         |\n"
          "  |                                                       |\n"
          "  |    Press '1' - Toggle Terrain                         |\n"
          "  |    Press '2' - Toggle Sights                          |\n"
@@ -314,10 +336,10 @@ void keyPressed (unsigned char key, int x, int y) {
         wasd[3] = true;
         break;
     case 'r':
-      removePoi();
+      removeSight();
       break;
     case 'c':
-      cyclePoi();
+      addSight();
       break;
     }
 }
