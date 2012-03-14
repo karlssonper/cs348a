@@ -9,4 +9,6 @@
 #define SIGHTTREE_H_
 
 std::vector<Vector3> optimalSightPath(const std::vector<Vector3>& cp);
+
+//class
 #endif /* SIGHTTREE_H_ */

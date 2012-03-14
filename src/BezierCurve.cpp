@@ -1,5 +1,6 @@
 #include "BezierCurve.h"
 #include <GL/glut.h>
+#include <math.h>
 
 BezierCurve::BezierCurve(Vector3 _p1, Vector3 _p2, Vector3 _p3) 
     : p1(_p1), p2(_p2), p3(_p3) {}
@@ -154,9 +155,23 @@ float BezierCurve::length(const std::vector<Vector3> &_cpts,
 }
 
 float BezierCurve::curvature(const Vector3 &_p1,
-						     const Vector3 &_p2,
-						     const Vector3 &_p3,
-						     float _t) {
-								 
-								 
+                       const Vector3 &_p2,
+                       const Vector3 &_p3,
+                       float _t,
+                       float _dt)
+{
+    Vector3 pm = BezierCurve::evaluate(_p1, _p2, _p3, _t-_dt);
+    Vector3 p = BezierCurve::evaluate(_p1, _p2, _p3, _t);
+    Vector3 pp = BezierCurve::evaluate(_p1, _p2, _p3, _t+_dt);
+
+    Vector3 v1 = pm-p;
+    Vector3 v2 = pp-p;
+
+    float s1 = v1.mag();
+    float s2 = v2.mag();
+
+    //this is cos theta
+    float d = v1.dot(v2)/(s1*s2);
+#define PI 3.14159265
+    return (PI - acos(d))/(s1+s2);
 }
