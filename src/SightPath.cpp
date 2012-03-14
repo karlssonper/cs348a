@@ -343,7 +343,7 @@ int SightPath2::solveMidSegment(int index, bool optimize)
       //printf("curvature at index(%i): %f\n",index,curvature);
       if (curvature > 0.15f && optimize && !hasImprovedCurvature)
 	{
-	  printf("bad curvature at index(%i): %f\n",index, curvature);
+	  //printf("bad curvature at index(%i): %f\n",index, curvature);
 	  Vector3 pprev = siteSegments_[index-1].p1;
 	  // calculate tangent to pprevious,cp0,p0
 	  Vector3 moveDirection = (p0-pprev).normalize().cross((cp0-pprev).normalize());
@@ -366,7 +366,7 @@ int SightPath2::solveMidSegment(int index, bool optimize)
       doesIntersect = intersects1 | intersects2;
       if (doesIntersect)
 	{
-	  printf("intersection!!! for index (%i)\n",index);
+	  //printf("intersection!!! for index (%i)\n",index);
 	  Vector3 moveAmount = Vector3(0,0,100.f);
 	  moveMidpoint(index-1,moveAmount);
 	  moveMidpoint(index,moveAmount);

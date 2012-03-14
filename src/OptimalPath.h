@@ -72,7 +72,7 @@ std::vector<Vector3> optimalSightPath(const std::vector<Vector3>& _cp)
     for (int j = 0; j < cp.size(); ++j) {
         newCP[j] = cp[t[minIdx].second[j]];
         newCP[j].z += 200;
-        printf("%f %f %f\n", newCP[j].x,newCP[j].y,newCP[j].z);
+        //printf("%f %f %f\n", newCP[j].x,newCP[j].y,newCP[j].z);
     }
     return newCP;
 

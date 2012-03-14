@@ -676,12 +676,12 @@ int main(int argc, char **argv)
     optimalTour = optimalSightPath(tour);
 
     terrain = new Terrain("../src/sample.mesh3","../src/sample.triangles3");
-    printf("terrain loaded\n");
+    //printf("terrain loaded\n");
     terrain->print();
 
     createSightPaths();
 
-    printf("everything made\n");
+    //printf("everything made\n");
     
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
