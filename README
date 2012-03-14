@@ -8,7 +8,9 @@ Here is our write-up for the final project flight path program.
 
 =========== Part A: MinMaxer for triangulation ==============
 
-<<TODO>>
+For triangulation we used the Delaunay1 algorithm on the given heightfield. We found it to be sufficiently fast for our purposes and noticably faster than the minmaxSlope despite no visual difference. Some of the other choices were not used due to them ignoring the z-value. The Delaunay1 (Lawson Flip) was chosen over the Incremental Flip version also because of speed (as desicribed in the MinMaxer documentation) while giving good results.
+
+Interfacing with MinMaxer involved modifying their sample files to read in our given heightfield data and then modifying a triangle printing function to dump the generated triangles to a data file. These values are then read into our program on launch and used to generate a Terrain class which assembles the data into a uniform grid for efficient collision detection and adds texture coordinates so we can map a Google Maps image of the area onto the terrain.
 
 ============= Part B: Planning a Smooth Tour  ===============
 
@@ -43,25 +45,94 @@ The algorithm is essentially a way to effeciently construct these requirements b
 
 To avoid collisions, we detect collisions along the candidate bezier curves of each POI and the following "travel curve." Collisions are effeciently found with the aid of a uniform grid spatial data structure. If collisions are found we adjust the positions of the midpoint control points since raising them generates a more dramatic dive for the adjacent control points and allows the flight to move over more obstacles. The control points are then re-evaluated for each adjacent POI. Similarly, extreme curvatures are handled by detecting when a curve creates a curvature greater than a specified minimum, and if so the mid control points are moved away from each other so there is more space between control points and a gentler curve.
 
-For our tour we computed a length 182622, a maximum curvature of 0.272, and a minimum distance from the ground of 54.3. We used a d=100 size bounding cube of region to collide with as a valid hit with the POI.
+We used a d=100 size bounding cube of region to collide with as a valid hit with the POI.
 
 =============== Part C: Viewing the Tour ====================
 
 We created our program using GLUT to offer capabilities of animation, user input, and multiple views. We render our terrain using a texture map we obtained from Google Maps and warped in photoshop to align with the given data. Multiple views can be toggled including a minimap showing an overall view of the area. Additionally points can be added and removed by interacting with the command line.
 
+Our animation is done by evaluating the bezier curves in order and using gluLookAt to set the current position as a position on the curve and the point to look as a point a little further ahead of the current point. This gives a roller coaster effect and is pretty fun. A top-down orthographic minimap is provided to visualize the global progress of the camera. We render the POIs as multiple colored boxes and additionally render each control point with a green box to better visualize the construction of the quad.
+
 ============== Part D: On the Fly Changes ===================
 
 Our algorithm constructs the path by iterating through the POIs and locally constructing the control points around the POI. Hence to remove a POI we need only remove it and then reconstruct the two adjacent POIs. To add a POI we add a new midpoint and construct the two new path segment surrounding the new POI and reconstruct the previous two adjacent POIs (since their midpoints relative to the now moved point have changed).
 
-
-
 ========== Part E: Tours for Unordered Sites ================
 
+<<TODO>>
+
+========== Part F: Metrics ==================================
+
+Total length:	182622 units
+Minimum vertical distance: 54.2 units
+Maximum curvature: 0.27 units
+Number of distinct curves: 27
+
+The measurements are done by evaluation at a certain number of points for each curve segment. To make sure that accuracy is adequate, the stepsize has been gradually lowered until the values start to converge at a satisfactory rate.
 
 
-=========== Part A: MinMaxer for triangulation ==============
+================== CONTROL POINTS ===========================
+
+  Control Point (0): (-3603.0,4592.0,206.1)
+  Control Point (1): (138.0,2497.5,936.7)
+  Control Point (2): (3376.7,543.5,362.9)
+  Control Point (3): (4153.5, 74.8,225.3)
+  Control Point (4): (3840.7,925.8,367.5)
+  Control Point (5): (1498.5,7298.0,1432.3)
+  Control Point (6): (-654.4,13864.0,292.3)
+  Control Point (7): (-867.3,14513.3,179.5)
+  Control Point (8): (-1127.4,13881.0,289.9)
+  Control Point (9): (-2204.0,11263.5,747.0)
+  Control Point (10): (-3455.1,8784.1,271.6)
+  Control Point (11): (-3777.8,8144.5,149.0)
+  Control Point (12): (-3089.3,8257.1,352.9)
+  Control Point (13): (686.5,8875.0,1470.7)
+  Control Point (14): (4475.7,9322.5,1353.2)
+  Control Point (15): (5323.6,9422.6,1326.9)
+  Control Point (16): (4473.0,9496.5,1355.0)
+  Control Point (17): (594.0,9833.5,1483.2)
+  Control Point (18): (-3282.4,10222.0,375.5)
+  Control Point (19): (-4145.8,10308.5,128.8)
+  Control Point (20): (-3269.7,10164.0,287.8)
+  Control Point (21): (3037.2,9123.3,1432.6)
+  Control Point (22): (8685.2,5892.0,573.9)
+  Control Point (23): (9273.7,5555.3,484.4)
+  Control Point (24): (8627.2,5756.9,580.1)
+  Control Point (25): (1360.8,8023.3,1655.2)
+  Control Point (26): (-5332.9,10525.2,374.3)
+  Control Point (27): (-6827.5,11083.8, 88.3)
+  Control Point (28): (-5255.4,10785.8,348.0)
+  Control Point (29): (3887.0,9052.5,1858.3)
+  Control Point (30): (13131.2,7585.2,340.6)
+  Control Point (31): (14406.9,7382.7,131.2)
+  Control Point (32): (13390.4,6610.5,419.2)
+  Control Point (33): (9289.5,3495.0,1580.9)
+  Control Point (34): (4861.1,-60.3,254.2)
+  Control Point (35): (4635.0,-241.8,186.4)
+  Control Point (36): (4844.9,-439.3,261.4)
+  Control Point (37): (7991.0,-3399.5,1385.3)
+  Control Point (38): (10660.8,-5637.2,488.3)
+  Control Point (39): (11672.8,-6485.4,148.3)
+  Control Point (40): (10946.2,-7608.0,415.3)
+  Control Point (41): (8856.5,-10836.8,1183.0)
+  Control Point (42): (5372.1,-13848.2,259.8)
+  Control Point (43): (5009.8,-14161.3,163.8)
+  Control Point (44): (5315.6,-13788.5,240.9)
+  Control Point (45): (12190.8,-5407.9,1975.3)
+  Control Point (46): (18859.7,1654.4,454.4)
+  Control Point (47): (20495.7,3386.9, 81.3)
+  Control Point (48): (18117.0,3272.3,463.5)
+  Control Point (49): (6855.0,2729.5,2272.9)
+  Control Point (50): (-5463.1,2581.0,281.3)
+  Control Point (51): (-6093.1,2573.4,179.5)
+  Control Point (52): (-5482.0,2421.9,284.2)
+  Control Point (53): (-2761.0,1747.5,750.3)
+  Control Point (54): (261.0,959.0,270.1)
 
 
+
+
+// Often used commands!
 
 command of doom:
 mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=DEBUG -DCMAKE_INSTALL_PREFIX=.. .. && make install

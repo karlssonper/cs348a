@@ -128,13 +128,21 @@ void updateTourer(const std::vector<Vector3> &_ctrlpts) {
 }
 
 void updateLength() {
+<<<<<<< HEAD
 	totalLength = BezierCurve::length(activeControlPoints(), 200);
 	minDistance = BezierCurve::minDistance(activeControlPoints(), 100, terrain);
+=======
+	totalLength = BezierCurve::length(controlPoints2, 100);
+>>>>>>> 40078d21b58e717bdc8e73fd89d9312c0028c463
 	std::cout << "Total length: " << totalLength << std::endl;
 }
 
 void updateDistance() {
+<<<<<<< HEAD
 	minDistance = BezierCurve::minDistance(activeControlPoints(), 500, terrain);
+=======
+	minDistance = BezierCurve::minDistance(controlPoints2, 5000, terrain);
+>>>>>>> 40078d21b58e717bdc8e73fd89d9312c0028c463
 	std::cout << "Min distance: " << minDistance << std::endl;
 }
 
@@ -656,6 +664,8 @@ void createSightPaths()
     sightPath2->createPath();
 
     updateControlPoints();
+    //sightPath2->print();
+
 }
 
 int main(int argc, char **argv)
