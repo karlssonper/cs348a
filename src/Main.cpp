@@ -47,6 +47,7 @@ float tourSpeed = 0.0005f;
 Vector3 tourPos, nextPos;
 
 float totalLength, minDistance, maxCurvature;
+int numberOfCurves;
 
 enum RenderEnum{
     RENDER_SIGHTPATH1,
@@ -104,6 +105,11 @@ void updateDistance() {
 void updateCurvature() {
 	maxCurvature = BezierCurve::maxCurvature(controlPoints2, 1000, 0.001);
 	std::cout << "Max curvature: " << maxCurvature << std::endl;
+}
+
+void updateNrCurves() {
+	numberOfCurves = (controlPoints2.size()-1)/2;
+	std::cout << "Nr of curves: " << numberOfCurves << std::endl;
 }
 
 void drawTourer(float _size) {
@@ -374,6 +380,7 @@ void printInfo()
          "  |    Press 'c'   - Add New Sight                        |\n"
          "  |    Press 'r'   - Remove Sight                         |\n"
          "  |    Press 'f'   - Toggle first person mode             |\n"
+		 "  |    Press 'v'   - Calculate number of arcs             |\n"
 		 "  |    Press 'b'   - Calculate total length               |\n"
 		 "  |    Press 'n'   - Calculate min distance               |\n"
 		 "  |    Press 'm'   - Calculate max curvature              |\n"
@@ -467,6 +474,9 @@ void keyPressed (unsigned char key, int x, int y) {
 		break;
 	case 'm':
 		updateCurvature();
+		break;
+	case 'v':
+		updateNrCurves();
 		break;
     }
 }
