@@ -70,7 +70,6 @@ public:
     void removeSight(int index);
     int numSights() {return sights_.size();}
     int moveMidpoint(int index, Vector3 diff);
-    int repulseMidpoints(int index1, int index2, float distance);
 
     const std::vector<Vector3> controlPoints();
 private:

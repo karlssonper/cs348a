@@ -105,9 +105,9 @@ bool intersection(const Vector3 & source, const Vector3 &dest, const Terrain *te
         IntersectionInfo ii = triangles[i].rayIntersect(r);
         //if (ii.t < dir.mag()) {
         if (ii.hit) {
-	  printf("intersection at (%f,%f,%f)\n",ii.p.x, ii.p.y, ii.p.z);
+	  /*printf("intersection at (%f,%f,%f)\n",ii.p.x, ii.p.y, ii.p.z);
 	  printf("  source at (%f,%f,%f)\n",source.x, source.y, source.z);
-	  printf("  dest at (%f,%f,%f)\n",dest.x, dest.y, dest.z);
+	  printf("  dest at (%f,%f,%f)\n",dest.x, dest.y, dest.z);*/
 	  return true;
 
         }
@@ -271,6 +271,8 @@ int SightPath2::solveMidSegment(int index, bool optimize)
   s.t = SiteType_Middle;
   bool doesIntersect = true;
   Vector3 cp1, p0, p1;
+  float scaleFactor = START_CURVE_SCALE;
+  bool hasImprovedCurvature = false;
   while (doesIntersect)
     {
       Vector3 cp0 = midpoints_[index-1]; // previous mid control point
@@ -279,7 +281,6 @@ int SightPath2::solveMidSegment(int index, bool optimize)
       Vector3 v1 = (poi - cp0).normalize();
       Vector3 v2 = (poi - cp2).normalize();
       Vector3 v = (v1+v2).normalize();
-      float scaleFactor = START_CURVE_SCALE;
       cp1 = poi + v*scaleFactor; // control point for current site
       Vector3 v3 = (cp0-cp1).normalize(); // vector from cp1 back to cp0
       Vector3 v4 = (cp2-cp1).normalize(); // vector from cp1 forward to cp2
@@ -287,7 +288,27 @@ int SightPath2::solveMidSegment(int index, bool optimize)
       float L = scaleFactor / (cos(theta / 2.f)); // scale of v3 and v4 relative to v
       p0 = cp1 + v3*(2.f*L); // point between cp0 and cp1
       p1 = cp1 + v4*(2.f*L); // point between cp1 and cp2
-      
+
+      float curvature = BezierCurve::maxCurvature(p0,cp1,p1,50,1.f/50);
+      printf("curvature at index(%i): %f\n",index,curvature);
+      if (curvature > 0.15f && !hasImprovedCurvature)
+	{
+	  printf("bad curvature at index(%i): %f\n",index, curvature);
+	  Vector3 pprev = siteSegments_[index-1].p1;
+	  // calculate tangent to pprevious,cp0,p0
+	  Vector3 moveDirection = (p0-pprev).normalize().cross((cp0-pprev).normalize());
+	  moveDirection.normalize();
+	  float part0Amount = (p0-cp0).mag() * 0.2f;
+	  float part1Amount = (p1-cp1).mag() * 0.2f;
+	  moveMidpoint(index-1, moveDirection * -part0Amount);
+	  moveMidpoint(index, moveDirection * part1Amount);
+	  scaleFactor *= 0.5f;
+	  if (!hasImprovedCurvature)
+	    {
+	      hasImprovedCurvature = !hasImprovedCurvature;
+	      continue;
+	    }
+	}
       // find intersections
       Vector3 prevP = siteSegments_[index-1].p1;
       int intersects1 = intersectionBezier(p0,cp1,p1,terrain_);
@@ -296,7 +317,7 @@ int SightPath2::solveMidSegment(int index, bool optimize)
       if (doesIntersect)
 	{
 	  printf("intersection!!! for index (%i)\n",index);
-	  Vector3 moveAmount = Vector3(0,0,200.f);
+	  Vector3 moveAmount = Vector3(0,0,100.f);
 	  moveMidpoint(index-1,moveAmount);
 	  moveMidpoint(index,moveAmount);
 	}
@@ -341,21 +362,4 @@ int SightPath2::moveMidpoint(int index, Vector3 diff)
   solveSiteSegment(index, false);
   solveSiteSegment(index+1, false);
   isPathValid_ = 0;
-}
-      
-int SightPath2::repulseMidpoints(int index1, int index2, float distance)
-{
-  if (index1 < 0 || index1 > midpoints_.size()-1 ||
-      index2 < 0 || index2 > midpoints_.size()-1)
-    return 0;
-  Vector3 m1 = midpoints_[index1];
-  Vector3 m2 = midpoints_[index2];
-  Vector3 diff = (m2 - m1).normalize() * distance*0.5f;
-  m1 = m1 - diff;
-  m2 = m2 + diff;
-  printf("spreading indexes (%i) and (%i) by (%f)\n",index1,index2,distance);
-  int maxIndex = (index2 == midpoints_.size()-1) ? index2 : index2+1;
-  for (unsigned int i = index1; i < maxIndex; i++)
-    solveSiteSegment(i, false);
-  isPathValid_ = 0;
-}
+}    
