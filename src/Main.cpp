@@ -223,7 +223,8 @@ void drawMinimap()
   //  camera->lookThrough();
   float saved = lineWidth;
   glDisable(GL_LIGHTING);
-  BezierCurve::renderCurves(controlPoints2,100,2.f,Vector3(1.f,0.5f,0.25f));
+  BezierCurve::renderCurves(controlPoints2,100,1.5f,Vector3(1.f,1.f,1.f));
+  drawTourer(1000.f);
   glEnable(GL_LIGHTING);
   drawTriangles();
   reshape(width,height);
