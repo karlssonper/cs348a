@@ -16,9 +16,24 @@
 
 #define MID_RAISE_FACTOR 0.08f
 #define START_CURVE_SCALE 2000.f
-
+#define NUM_BEZIER_COLLISION_TESTS 10
 class Terrain;
+
+bool intersection(const Vector3 & source, const Vector3 &dest, const Terrain *terrain_);
+bool intersection(const Vector3 & v0, const Vector3 &v1, const Vector3 &v2, const Terrain *terrain_);
+// intersection for bezier curve made of points p0,p1,p2
+bool intersectionBezier(const Vector3 & p0, const Vector3 & p1, const Vector3 &p2, const Terrain *terrain_);
+
+class SightPathInterface
+{
+ public:
+  virtual const std::vector<Vector3> controlPoints()=0;
+  virtual void removeSight(int index)=0;
+};
+  
+
 class SightPath
+: public SightPathInterface
 {
 public:
     SightPath(const Terrain * terrain,
@@ -26,8 +41,8 @@ public:
 
     void createConstraintTangents();
     void createControlPoints();
-    void removeSight(int i);
-    const std::vector<Vector3> & controlPoints() const {return controlPoints_;};
+    void removeSight(int index);
+    const std::vector<Vector3> controlPoints() {return controlPoints_;};
     std::vector<Vector3> sights() const;
 private:
     struct Sight {
@@ -40,13 +55,12 @@ private:
 
     void solve (Sight sight0, Sight sight1);
     Vector3 tangent(Vector3 p0, Vector3 p1);
-    bool intersection(const Vector3 & source, const Vector3 &dest);
-    bool intersection(const Vector3 & v0, const Vector3 &v1, const Vector3 &v2);
 };
 
 
 // Alternate method
 class SightPath2
+: public SightPathInterface
 {
 public:
     SightPath2(const Terrain * terrain,
@@ -54,13 +68,16 @@ public:
 
     void createPath();
     void removeSight(int index);
-    const std::vector<Vector3> controlPoints();
     int numSights() {return sights_.size();}
+    int moveMidpoint(int index, Vector3 diff);
+
+    const std::vector<Vector3> controlPoints();
 private:
-    int solveSiteSegment(int index);    
-    int solveFirstSegment();
-    int solveLastSegment();
-    int solveMidSegment(int index);
+    void createMidpoints();
+    int solveSiteSegment(int index, bool optimize=false);    
+    int solveFirstSegment(bool optimize=false);
+    int solveLastSegment(bool optimize=false);
+    int solveMidSegment(int index, bool optimize=false);
     Vector3 getMidPoint(int index1, int index2);
     int getLength(int index1, int index2);
     enum SiteType
@@ -72,13 +89,12 @@ private:
     struct SiteSegment
     {
       SiteType t;
-      Vector3 ctrl0;
       Vector3 p0;
-      Vector3 ctrl1;
+      Vector3 ctrl;
       Vector3 p1;
-      Vector3 ctrl2;      
     };
     std::vector<SiteSegment> siteSegments_;
+    std::vector<Vector3> midpoints_;
     std::vector<Vector3> sights_;
     std::vector<Vector3> path_;
     int isPathValid_;
