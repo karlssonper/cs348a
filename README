@@ -8,9 +8,7 @@ Here is our write-up for the final project flight path program.
 
 =========== Part A: MinMaxer for triangulation ==============
 
-For triangulation we used the Delaunay1 algorithm on the given heightfield. We found it to be sufficiently fast for our purposes and noticably faster than the minmaxSlope despite no visual difference. Some of the other choices were not used due to them ignoring the z-value.
-
-<<<TODO>>>: Why Delaunay1???
+For triangulation we used the Delaunay1 algorithm on the given heightfield. We found it to be sufficiently fast for our purposes and noticably faster than the minmaxSlope despite no visual difference. Some of the other choices were not used due to them ignoring the z-value. The Delaunay1 (Lawson Flip) was chosen over the Incremental Flip version also because of speed (as desicribed in the MinMaxer documentation) while giving good results.
 
 Interfacing with MinMaxer involved modifying their sample files to read in our given heightfield data and then modifying a triangle printing function to dump the generated triangles to a data file. These values are then read into our program on launch and used to generate a Terrain class which assembles the data into a uniform grid for efficient collision detection and adds texture coordinates so we can map a Google Maps image of the area onto the terrain.
 
@@ -47,7 +45,7 @@ The algorithm is essentially a way to effeciently construct these requirements b
 
 To avoid collisions, we detect collisions along the candidate bezier curves of each POI and the following "travel curve." Collisions are effeciently found with the aid of a uniform grid spatial data structure. If collisions are found we adjust the positions of the midpoint control points since raising them generates a more dramatic dive for the adjacent control points and allows the flight to move over more obstacles. The control points are then re-evaluated for each adjacent POI. Similarly, extreme curvatures are handled by detecting when a curve creates a curvature greater than a specified minimum, and if so the mid control points are moved away from each other so there is more space between control points and a gentler curve.
 
-For our tour we computed a length 182622, a maximum curvature of 0.272, and a minimum distance from the ground of 54.3. We used a d=100 size bounding cube of region to collide with as a valid hit with the POI.
+We used a d=100 size bounding cube of region to collide with as a valid hit with the POI.
 
 =============== Part C: Viewing the Tour ====================
 
@@ -62,6 +60,15 @@ Our algorithm constructs the path by iterating through the POIs and locally cons
 ========== Part E: Tours for Unordered Sites ================
 
 <<TODO>>
+
+========== Part F: Metrics ==================================
+
+Total length:	182622 units
+Minimum vertical distance: 54.2 units
+Maximum curvature: 0.27 units
+Number of distinct curves: 27
+
+The measurements are done by evaluation at a certain number of points for each curve segment. To make sure that accuracy is adequate, the stepsize has been gradually lowered until the values start to converge at a satisfactory rate.
 
 
 ================== CONTROL POINTS ===========================
