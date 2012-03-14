@@ -141,7 +141,8 @@ void addSight()
         return;
     }
     //add!
-
+    sightPath2->addSight(Vector3(x,y,z), idx);
+    controlPoints2 = sightPath2->controlPoints();
     wasd[0] = false;
     wasd[1] = false;
     wasd[2] = false;
