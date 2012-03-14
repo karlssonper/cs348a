@@ -81,11 +81,19 @@ void updateTourer(const std::vector<Vector3> &_ctrlpts) {
 	nextPos = BezierCurve::evaluateGlobal(_ctrlpts, tourT+0.001f);
 }
 
-void updateMetrics() {
+void updateLength() {
 	totalLength = BezierCurve::length(controlPoints, 200);
-	minDistance = BezierCurve::minDistance(controlPoints, 100, terrain);
 	std::cout << "Total length: " << totalLength << std::endl;
+}
+
+void updateDistance() {
+	minDistance = BezierCurve::minDistance(controlPoints, 500, terrain);
 	std::cout << "Min distance: " << minDistance << std::endl;
+}
+
+void updateCurvature() {
+	maxCurvature = BezierCurve::maxCurvature(controlPoints, 10000, 0.0000001);
+	std::cout << "Max curvature: " << maxCurvature << std::endl;
 }
 
 void drawTourer(float _size) {
@@ -340,6 +348,10 @@ void printInfo()
          "  |    Press 'c'   - Add New Sight                        |\n"
          "  |    Press 'r'   - Remove Sight                         |\n"
          "  |    Press 'f'   - Toggle first person mode             |\n"
+		 "  |    Press 'b'   - Calculate total length               |\n"
+		 "  |    Press 'n'   - Calculate min distance               |\n"
+		 "  |    Press 'm'   - Calculate max curvature              |\n"
+		 "  |                                                       |\n"
          "  |    Press '1' - Toggle Terrain                         |\n"
          "  |    Press '2' - Toggle Sights                          |\n"
          "  |    Press '3' - Toggle Sight Path                      |\n"
@@ -412,6 +424,16 @@ void keyPressed (unsigned char key, int x, int y) {
 	case 'f':
 		bFirstPerson = !bFirstPerson;
 		break;
+	case 'b':
+		updateLength();
+		break;
+	case 'n':
+		updateDistance();
+		break;
+	case 'm':
+		updateCurvature();
+		break;
+		
     }
 }
 
@@ -507,7 +529,6 @@ int main(int argc, char **argv)
     glutMotionFunc(mouseFunc);
     glutPassiveMotionFunc(mouseMoveFunc);
     printInfo();
-    updateMetrics();
     glutMainLoop();
     return 0;
 }
