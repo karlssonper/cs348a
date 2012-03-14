@@ -235,12 +235,27 @@ void SightPath2::createPath()
   siteSegments_.clear();
   siteSegments_.resize(numSights());
   for (unsigned int i = 0; i < numSights(); i++)
-    solveSiteSegment(i);
+    solveSiteSegment(i,true);
 }
 
 void SightPath2::addSight(Vector3 pos, int prevSightIdx)
 {
-
+  if (prevSightIdx < 0 || prevSightIdx >= numSights()-1)
+    return;
+  sights_.insert(sights_.begin()+prevSightIdx,pos);
+  siteSegments_.insert(siteSegments_.begin()+prevSightIdx,SiteSegment());
+  midpoints_.insert(midpoints_.begin()+prevSightIdx,Vector3());
+  Vector3 m0 = getMidPoint(prevSightIdx, prevSightIdx+1);
+  Vector3 m1 = getMidPoint(prevSightIdx+1, prevSightIdx+2);
+  Vector3 upDirection(0,0,1);
+  float midPointPushAmount0 = getLength(prevSightIdx,prevSightIdx+1)*MID_RAISE_FACTOR;      
+  float midPointPushAmount1 = getLength(prevSightIdx+1,prevSightIdx+2)*MID_RAISE_FACTOR;      
+  midpoints_[prevSightIdx] = m0 + upDirection * midPointPushAmount0;
+  midpoints_[prevSightIdx+1] = m1 + upDirection * midPointPushAmount1;
+  solveSiteSegment(prevSightIdx);
+  solveSiteSegment(prevSightIdx+1);
+  solveSiteSegment(prevSightIdx+2);
+  isPathValid_ = 0;
 }
  
 void SightPath2::removeSight(int index)
@@ -300,8 +315,8 @@ int SightPath2::solveMidSegment(int index, bool optimize)
       p1 = cp1 + v4*(2.f*L); // point between cp1 and cp2
 
       float curvature = BezierCurve::maxCurvature(p0,cp1,p1,50,1.f/50);
-      printf("curvature at index(%i): %f\n",index,curvature);
-      if (curvature > 0.15f && !hasImprovedCurvature)
+      //printf("curvature at index(%i): %f\n",index,curvature);
+      if (curvature > 0.15f && optimize && !hasImprovedCurvature)
 	{
 	  printf("bad curvature at index(%i): %f\n",index, curvature);
 	  Vector3 pprev = siteSegments_[index-1].p1;
@@ -326,10 +341,11 @@ int SightPath2::solveMidSegment(int index, bool optimize)
       doesIntersect = intersects1 | intersects2;
       if (doesIntersect)
 	{
-	  printf("intersection!!! for index (%i)\n",index);
+	  //printf("intersection!!! for index (%i)\n",index);
 	  Vector3 moveAmount = Vector3(0,0,100.f);
 	  moveMidpoint(index-1,moveAmount);
 	  moveMidpoint(index,moveAmount);
+	  scaleFactor *= 0.5f;
 	}
     }
 
@@ -367,7 +383,7 @@ int SightPath2::moveMidpoint(int index, Vector3 diff)
   Vector3 m = midpoints_[index];
   m = m + diff;
   midpoints_[index] = m;
-  printf("moving index(%i) to (%f,%f,%f)\n",index,m.x,m.y,m.z);
+  //printf("moving index(%i) to (%f,%f,%f)\n",index,m.x,m.y,m.z);
   // resolve current 
   solveSiteSegment(index, false);
   solveSiteSegment(index+1, false);

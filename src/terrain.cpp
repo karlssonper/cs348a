@@ -285,10 +285,12 @@ void Terrain::CreateColors()
   float maxZ = maxBound.z;
   float range = maxZ - minZ;
   float scale;
+  int color;
+  colors.clear();
   for (unsigned int i = 0; i < points.size(); i++)
     {
       Vector3 v = points[i];
       scale = (v.z-minZ) / range;
-      heights.push_back(scale);
+      colors.push_back(color);
     }
 }
