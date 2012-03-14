@@ -241,6 +241,7 @@ float BezierCurve::maxCurvature(const Vector3 &_p1,
          float temp = curvature(_p1, _p2, _p3, t, _dt);
          if (temp > max) max = temp;
      }
+     std::cout << "max local: " << max << std::endl;
 	return max;
 }
 
