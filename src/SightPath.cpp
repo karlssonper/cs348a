@@ -343,3 +343,19 @@ int SightPath2::moveMidpoint(int index, Vector3 diff)
   isPathValid_ = 0;
 }
       
+int SightPath2::repulseMidpoints(int index1, int index2, float distance)
+{
+  if (index1 < 0 || index1 > midpoints_.size()-1 ||
+      index2 < 0 || index2 > midpoints_.size()-1)
+    return 0;
+  Vector3 m1 = midpoints_[index1];
+  Vector3 m2 = midpoints_[index2];
+  Vector3 diff = (m2 - m1).normalize() * distance*0.5f;
+  m1 = m1 - diff;
+  m2 = m2 + diff;
+  printf("spreading indexes (%i) and (%i) by (%f)\n",index1,index2,distance);
+  int maxIndex = (index2 == midpoints_.size()-1) ? index2 : index2+1;
+  for (unsigned int i = index1; i < maxIndex; i++)
+    solveSiteSegment(i, false);
+  isPathValid_ = 0;
+}
