@@ -40,6 +40,10 @@ Terrain *terrain;
 SightPath * sightPath;
 SightPath2 * sightPath2;
 
+float tourT = 0.f;
+float tourSpeed = 0.005f;
+Vector3 tourPos;
+
 int currentPoi = 2;
 
 bool bDrawTerrain = true;
@@ -50,11 +54,37 @@ bool bDrawControlPolygon = false;
 bool bDrawControlPolygonExt = false;
 bool bDrawControlPolyFill = false;
 bool bDrawToursBB = false;
+bool bDrawTourer = true;
 bool wasd[4] = {false,false,false,false};
+bool moveTourer [2] = { false, false };
 
 void reshape(int x, int y);
 void drawCurves();
 void display();
+
+void stepTourer(float _inc) {
+	tourT += _inc;
+	if (tourT >= 1.f) tourT = 0.0001f;
+	else if (tourT < 0.f) tourT = 0.9999f;
+	//std::cout << "t=" << tourT << std::endl;
+	//std::cout << "nofctrlpts=" << controlPoints.size() << std::endl;
+	//for (int i=0; i<controlPoints.size(); ++i) {
+	//	std::cout << controlPoints.at(i).x << " " << controlPoints.at(i).y << " " << controlPoints.at(i).z << std::endl;
+	//}
+}
+
+void updateTourer(const std::vector<Vector3> &_ctrlpts) {
+	tourPos = BezierCurve::evaluateGlobal(_ctrlpts, tourT);
+}
+
+void drawTourer(float _size) {
+	glPushMatrix();
+	glTranslatef(tourPos.x, tourPos.y, tourPos.z);
+	glColor3f(1.f, 0.f, 1.f);
+	glutSolidCube(_size);
+	glPopMatrix();
+}
+
 void drawTriangles()
 {
   glColor3f(1.f, 1.f, 1.f);
@@ -181,6 +211,11 @@ void drawCurves()
 
   if(bDrawToursBB)
     drawBoundingTour(&tour);
+    
+  if(bDrawTourer) {
+	  updateTourer(controlPoints);
+	  drawTourer(300.f);
+  }
 
 }
     
@@ -190,6 +225,8 @@ void display() {
     if (wasd[1]) camera->walkBackwards(20.f*scale);
     if (wasd[2]) camera->strafeLeft(10.f*scale);
     if (wasd[3]) camera->strafeRight(10.f*scale);
+    if (moveTourer[0]) stepTourer(tourSpeed);
+    if (moveTourer[1]) stepTourer(-tourSpeed);
 
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -218,7 +255,7 @@ void display() {
     glDisable(GL_LIGHTING);
     if (bDrawTours)
         drawTour(&tour);
-
+    
     drawCurves();
     //drawMinimap();
 
@@ -267,6 +304,7 @@ void printInfo()
          "  |    Press '6' - Toggle Control Polygon Extended        |\n"
          "  |    Press '7' - Toggle Control Polygon Filled          |\n"
          "  |    Press '8' - Toggle Sights Bounding Boxsed          |\n"
+         "  |    Press '9' - Toggle Tourer                          |\n"
          "  |                                                       |\n"
          "  |    Press 'esc' - Quit                                 |\n"
          "  ---------------------------------------------------------"
@@ -301,6 +339,9 @@ void keyPressed (unsigned char key, int x, int y) {
     case '8':
         bDrawToursBB = !bDrawToursBB;
         break;
+    case '9':
+		bDrawTourer = !bDrawTourer;
+        break;
     case 'w':
         wasd[0] = true;
         break;
@@ -319,6 +360,12 @@ void keyPressed (unsigned char key, int x, int y) {
     case 'c':
       cyclePoi();
       break;
+    case 'q':
+		moveTourer[0] = true;
+		break;
+	case 'e':
+		moveTourer[1] = true;
+		break;
     }
 }
 
@@ -336,6 +383,12 @@ void keyReleased (unsigned char key, int x, int y) {
         case 'd':
             wasd[3] = false;
             break;
+        case 'q':
+			moveTourer[0] = false;
+			break;
+		case 'e':
+			moveTourer[1] = false;
+			break;
     }
 }
 

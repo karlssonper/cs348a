@@ -32,7 +32,8 @@ Vector3 BezierCurve::evaluateGlobal(const std::vector<Vector3> &_cpts,
 	int localPolygon = floor(_t / localInterval);
 	
 	// roundoff issues towards the end (just return last possible point)
-	if (2*localPolygon+2 > _cpts.size()-1) {
+	//if (2*localPolygon+2 > _cpts.size()-1) {
+	if (_t >= 1.0f) {
 		Vector3 p1 = _cpts.at(_cpts.size()-3);
 		Vector3 p2 = _cpts.at(_cpts.size()-2);
 		Vector3 p3 = _cpts.at(_cpts.size()-1);
