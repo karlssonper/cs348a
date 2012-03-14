@@ -29,7 +29,8 @@ vector<int> y;
 vector<int> z;
 vector<Vector3> tour;
 vector<Vector3> tourColors;
-vector<Vector3> controlPoints;
+vector<Vector3> controlPoints1;
+vector<Vector3> controlPoints2;
 triangleList *tl;
 char *g;
 int n, tn;
@@ -37,7 +38,8 @@ Camera* camera;
 int mouseX, mouseY;
 
 Terrain *terrain;
-SightPath * sightPath;
+SightPathInterface * sightPath;
+SightPath1 * sightPath1;
 SightPath2 * sightPath2;
 
 float tourT = 0.f;
@@ -46,7 +48,13 @@ Vector3 tourPos, nextPos;
 
 float totalLength, minDistance, maxCurvature;
 
-int currentPoi = 2;
+enum RenderEnum{
+    RENDER_SIGHTPATH1,
+    RENDER_SIGHTPATH2,
+    RENDER_BOTH,
+};
+
+RenderEnum render = RENDER_SIGHTPATH2;
 
 bool bDrawTerrain = true;
 bool bDrawTours = true;
@@ -65,6 +73,12 @@ void reshape(int x, int y);
 void drawCurves();
 void display();
 
+void updateControlPoints()
+{
+    controlPoints1 = sightPath1->controlPoints();
+    controlPoints2 = sightPath2->controlPoints();
+}
+
 void stepTourer(float _inc) {
 	tourT += _inc;
 	if (tourT >= 1.f) tourT = 0.0001f;
@@ -82,8 +96,8 @@ void updateTourer(const std::vector<Vector3> &_ctrlpts) {
 }
 
 void updateMetrics() {
-	totalLength = BezierCurve::length(controlPoints, 200);
-	minDistance = BezierCurve::minDistance(controlPoints, 100, terrain);
+	totalLength = BezierCurve::length(controlPoints2, 200);
+	minDistance = BezierCurve::minDistance(controlPoints2, 100, terrain);
 	std::cout << "Total length: " << totalLength << std::endl;
 	std::cout << "Min distance: " << minDistance << std::endl;
 }
@@ -118,7 +132,7 @@ void addSight()
     std::cout << "Please enter after which #sight it should be added(int): ";
     int idx;
     std::cin >> idx;
-    if (idx <0 || idx > controlPoints.size()-1) {
+    if (idx <0 || idx > controlPoints2.size()-1) {
         std::cerr << "Bad Index!" << std::endl;
         return;
     }
@@ -140,7 +154,7 @@ void removeSight()
                  "Please enter idx(int): ";
     int idx;
     std::cin >> idx;
-    if (idx <0 || idx > controlPoints.size()-1) {
+    if (idx <0 || idx > controlPoints2.size()-1) {
         std::cerr << "Bad Index!" << std::endl;
         return;
     }
@@ -240,30 +254,24 @@ void initGL() {
     camera->pitch = 36.799988;
 }
 
-void drawCurves()
+void drawCurves(bool renderFirst)
 {
+    std::vector<Vector3> * controlPoints = renderFirst ? &controlPoints1: &controlPoints2 ;
+
   if(bDrawCurve)
-    BezierCurve::renderCurves(controlPoints,100,3.f);
+    BezierCurve::renderCurves(*controlPoints,100,3.f);
   
   if (bDrawControlPoints)
-    BezierCurve::renderCtrlPts(controlPoints, 60);
+    BezierCurve::renderCtrlPts(*controlPoints, 60);
   
   if (bDrawControlPolygon)
-    BezierCurve::renderCtrlPoly(controlPoints,4.f);
+    BezierCurve::renderCtrlPoly(*controlPoints,4.f);
   
   if(bDrawControlPolygonExt)
-    BezierCurve::renderCtrlPolyExt(controlPoints,4.f);
+    BezierCurve::renderCtrlPolyExt(*controlPoints,4.f);
   
   if (bDrawControlPolyFill)
-    BezierCurve::renderCtrlPolyFill(controlPoints);
-
-  if(bDrawToursBB)
-    drawBoundingTour(&tour);
-    
-  if(bDrawTourer) {
-	  drawTourer(300.f);
-  }
-  
+    BezierCurve::renderCtrlPolyFill(*controlPoints);
 
 }
     
@@ -301,8 +309,28 @@ void display() {
     if (bDrawTours)
         drawTour(&tour);
     
-    updateTourer(controlPoints);
-    drawCurves();
+    updateTourer(controlPoints2);
+
+
+    if(bDrawToursBB)
+      drawBoundingTour(&tour);
+
+    if(bDrawTourer) {
+        drawTourer(300.f);
+    }
+
+    switch (render){
+        case  RENDER_SIGHTPATH1:
+            drawCurves(true);
+            break;
+        case RENDER_SIGHTPATH2:
+            drawCurves(false);
+            break;
+        case RENDER_BOTH:
+            drawCurves(true);
+            drawCurves(false);
+            break;
+    }
     //drawMinimap();
 
     glutSwapBuffers();
@@ -412,6 +440,15 @@ void keyPressed (unsigned char key, int x, int y) {
 	case 'f':
 		bFirstPerson = !bFirstPerson;
 		break;
+	case 'j':
+	    render = RENDER_SIGHTPATH1;
+	    break;
+	case 'k':
+	    render = RENDER_SIGHTPATH2;
+	    break;
+	case 'l':
+	    render = RENDER_BOTH;
+	    break;
     }
 }
 
@@ -456,18 +493,14 @@ void mouseMoveFunc(int x,int y)
 
 void createSightPaths()
 {
-  /*// create sight path 1
-  printf("sight path loaded\n");
-  sightPath->createConstraintTangents();
-  printf("constraint trangents made\n");
-  sightPath->createControlPoints();
-  printf("control points created\n");
-  //controlPoints = sightPath->controlPoints();*/
+    sightPath1 = new SightPath1(terrain, tour);
+    sightPath1->createConstraintTangents();
+    sightPath1->createControlPoints();
 
-  // create sight path 1
-  printf("sight path loaded\n");
-  sightPath2->createPath();
-  controlPoints = sightPath2->controlPoints();
+    sightPath2 = new SightPath2(terrain, tour);
+    sightPath2->createPath();
+
+    updateControlPoints();
 }
 
 int main(int argc, char **argv)
@@ -487,9 +520,6 @@ int main(int argc, char **argv)
     printf("terrain loaded\n");
     terrain->print();
 
-    //tour.resize(9);
-    sightPath = new SightPath(terrain, tour);
-    sightPath2 = new SightPath2(terrain, tour);    
     createSightPaths();
 
     printf("everything made\n");

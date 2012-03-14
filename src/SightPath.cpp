@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include "BezierCurve.h"
 
-SightPath::SightPath(const Terrain * terrain,
+SightPath1::SightPath1(const Terrain * terrain,
           const std::vector<Vector3> &sights) : terrain_(terrain)
 {
     sights_.resize(sights.size());
@@ -23,7 +23,7 @@ SightPath::SightPath(const Terrain * terrain,
     }
 }
 
-Vector3 SightPath::tangent(Vector3 p0, Vector3 p1)
+Vector3 SightPath1::tangent(Vector3 p0, Vector3 p1)
 {
     Vector3 dir = p1 - p0;
 #define PI 3.14159265
@@ -33,7 +33,7 @@ Vector3 SightPath::tangent(Vector3 p0, Vector3 p1)
     return t;
 }
 
-void SightPath::createConstraintTangents()
+void SightPath1::createConstraintTangents()
 {
     //first point's tangent is the direction to the first sight
     sights_.front().tangent = tangent(sights_[0].pos,sights_[1].pos);
@@ -46,7 +46,7 @@ void SightPath::createConstraintTangents()
                                      sights_[sights_.size()-1].pos);
 }
 
-void SightPath::createControlPoints()
+void SightPath1::createControlPoints()
 {
     controlPoints_.clear();
     for (int i = 0; i < sights_.size() - 1; ++i){
@@ -55,12 +55,12 @@ void SightPath::createControlPoints()
     controlPoints_.push_back(sights_.back().pos);
 }
 
-void SightPath::removeSight(int index)
+void SightPath1::removeSight(int index)
 {
     sights_.erase(sights_.begin()+index);
 }
 
-std::vector<Vector3> SightPath::sights() const
+std::vector<Vector3> SightPath1::sights() const
 {
     std::vector<Vector3> pos(sights_.size());
     for (int i = 0; i < sights_.size(); ++i){
@@ -69,7 +69,12 @@ std::vector<Vector3> SightPath::sights() const
     return pos;
 }
 
-void SightPath::solve (Sight sight0, Sight sight1)
+void SightPath1::addSight(Vector3 pos, int prevSightIdx)
+{
+
+}
+
+void SightPath1::solve (Sight sight0, Sight sight1)
 {
     Vector3 cp0 = sight0.pos, cp1 = sight1.pos, mp;
     do {
@@ -231,6 +236,11 @@ void SightPath2::createPath()
   siteSegments_.resize(numSights());
   for (unsigned int i = 0; i < numSights(); i++)
     solveSiteSegment(i);
+}
+
+void SightPath2::addSight(Vector3 pos, int prevSightIdx)
+{
+
 }
  
 void SightPath2::removeSight(int index)
