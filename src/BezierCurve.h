@@ -46,6 +46,10 @@ public:
 							  const Vector3 &_p3,
 							  int _steps,
 							  float _dt);
+							  
+	static float maxCurvature(const std::vector<Vector3> &_cpts,
+							  int _steps,
+							  float _dt);
 						   
 	static float minDistance(const Vector3 &_p1,
 						     const Vector3 &_p2,
