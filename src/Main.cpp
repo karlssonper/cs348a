@@ -71,6 +71,8 @@ bool bFirstPerson = false;
 bool wasd[4] = {false,false,false,false};
 bool moveTourer [2] = { false, false };
 
+GLuint texID;
+
 void reshape(int x, int y);
 void drawCurves();
 void display();
@@ -124,7 +126,11 @@ void drawTourer(float _size) {
 void drawTriangles()
 {
   glColor3f(1.f, 1.f, 1.f);
+  glEnable(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, texID);
   terrain->renderTriangles();
+  glBindTexture(GL_TEXTURE_2D, 0);
+  glDisable(GL_TEXTURE_2D);
 }
 
 void addSight()
@@ -248,6 +254,42 @@ void parseTour(string filename,
     infile.close();  
 }
 
+void loadTexture()
+{
+    int c;
+    ifstream infile;
+    infile.open("../src/texture.data");
+    std::vector<unsigned char> pixelData;
+    if (infile.is_open()) {
+        while (!infile.eof()) {
+            infile >> c;
+            if (infile.eof()) break;
+            //std::cerr << c << std::endl;
+            //std::cerr << static_cast<unsigned char>(c) << std::endl;
+
+            pixelData.push_back(static_cast<unsigned char>(c));
+        }
+    } else {
+        cout << "texture could not be opened" << endl;
+    }
+
+    infile.close();
+
+    glGenTextures(1, &texID);
+    glBindTexture(GL_TEXTURE_2D, texID);
+    glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA, 512, 512, 0, GL_RGBA,
+            GL_UNSIGNED_BYTE,&pixelData[0]);
+    //glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+            //GL_LINEAR_MIPMAP_NEAREST );
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+}
+
 void initGL() {
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
@@ -258,7 +300,10 @@ void initGL() {
     glLoadIdentity();
     glViewport(0, 0, width, height);
     gluPerspective(60.f, width/height, 0.1f, 100000.f);
+    //glOrtho(-20000, 20000.0, -20000, 20000.0, -30.0, 2000);
+
     glMatrixMode(GL_MODELVIEW);
+    loadTexture();
     camera = new Camera(0.0f, 0.0f, 2000.f, 0.f, 0.f);
     camera->posX = 7553.189941;
     camera->posY = -6245.730469;
@@ -312,9 +357,25 @@ void display() {
 		camera->lookThrough();
 	}
 
+    /*glDisable(GL_LIGHTING);
+    glLineWidth(15);
+    glColor3f(1.f, 1.0f, 1.0f);
+    glBegin(GL_LINES);
+    glVertex3f(-23469, -19540.000000, -2 );
+    glVertex3f(23469,  -19540.000000, -2);
 
+    glVertex3f(23469, -19540.000000, -2 );
+    glVertex3f(23469,  19540.000000, -2);
+
+    glVertex3f(-23469, -19540.000000, -2 );
+    glVertex3f(-23469,  19540.000000, -2);
+
+    glVertex3f(-23469, 19540.000000, -2 );
+    glVertex3f(23469,  19540.000000, -2);
+
+    glEnd();
        
-    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHTING);*/
     GLfloat lightPos[] = { 0.0, -1.0, 1.0, 0.0 };
     glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
     if(bDrawTerrain)

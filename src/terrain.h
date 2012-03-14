@@ -28,8 +28,10 @@ class Terrain
   std::vector<Triangle> getTriangles(Vector3 p1, Vector3 p2) const;
 
   std::vector<Vector3> points;
+  std::vector<Vector3> uv;
   std::vector<Point> triangles;
   std::vector<Vector3> normals;
+  std::vector<Vector3> vertexNormals;
   std::vector<float> heights;
   std::vector<Vector3> colors;
   std::vector<std::vector<int> > grid;
