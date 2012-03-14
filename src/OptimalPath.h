@@ -64,7 +64,7 @@ std::vector<Vector3> optimalSightPath(const std::vector<Vector3>& _cp)
     for (int j = 0; j < t.size(); ++j) {
         if (t[j].first < min) {
             min = t[j].first;
-            minIdx = j;
+        minIdx = j;
         }
     }
 
@@ -74,8 +74,6 @@ std::vector<Vector3> optimalSightPath(const std::vector<Vector3>& _cp)
         newCP[j].z += 200;
         printf("%f %f %f\n", newCP[j].x,newCP[j].y,newCP[j].z);
     }
-    int i;
-    std::cin >> i;
     return newCP;
 
 }

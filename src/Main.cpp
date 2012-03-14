@@ -73,6 +73,8 @@ bool bFirstPerson = false;
 bool wasd[4] = {false,false,false,false};
 bool moveTourer [2] = { false, false };
 
+GLuint texID;
+
 void reshape(int x, int y);
 void drawCurves(bool);
 void display();
@@ -118,7 +120,7 @@ void updateNrCurves() {
 void drawTourer(float _size) {
 	glPushMatrix();
 	glTranslatef(tourPos.x, tourPos.y, tourPos.z);
-	glColor3f(1.f, 0.f, 1.f);
+	glColor3f(1.0f, 1.0f, 0.f);
 	glutSolidCube(_size);
 	glPopMatrix();
 }
@@ -126,7 +128,11 @@ void drawTourer(float _size) {
 void drawTriangles()
 {
   glColor3f(1.f, 1.f, 1.f);
+  glEnable(GL_TEXTURE_2D);
+  glBindTexture(GL_TEXTURE_2D, texID);
   terrain->renderTriangles();
+  glBindTexture(GL_TEXTURE_2D, 0);
+  glDisable(GL_TEXTURE_2D);
 }
 
 void addSight()
@@ -214,7 +220,7 @@ void drawMinimap()
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   glViewport(0, 0, miniWidth, miniHeight);
-  glOrtho(-18000.f, 18000.f, -18000.f, 18000.f, 10.0f, 10000.f);
+  glOrtho(-20000.f, 20000.f, -19000.f, 19000.f, 10.0f, 10000.f);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   gluLookAt(0.0, 0.0, 5000.0,
@@ -223,7 +229,7 @@ void drawMinimap()
   //  camera->lookThrough();
   float saved = lineWidth;
   glDisable(GL_LIGHTING);
-  BezierCurve::renderCurves(controlPoints2,100,1.5f,Vector3(1.f,1.f,1.f));
+  BezierCurve::renderCurves(controlPoints2,100,1.0f,Vector3(0.9,0.15,0.15));
   drawTourer(1000.f);
   glEnable(GL_LIGHTING);
   drawTriangles();
@@ -254,6 +260,42 @@ void parseTour(string filename,
     infile.close();  
 }
 
+void loadTexture()
+{
+    int c;
+    ifstream infile;
+    infile.open("../src/texture.data");
+    std::vector<unsigned char> pixelData;
+    if (infile.is_open()) {
+        while (!infile.eof()) {
+            infile >> c;
+            if (infile.eof()) break;
+            //std::cerr << c << std::endl;
+            //std::cerr << static_cast<unsigned char>(c) << std::endl;
+
+            pixelData.push_back(static_cast<unsigned char>(c));
+        }
+    } else {
+        cout << "texture could not be opened" << endl;
+    }
+
+    infile.close();
+
+    glGenTextures(1, &texID);
+    glBindTexture(GL_TEXTURE_2D, texID);
+    glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA, 512, 512, 0, GL_RGBA,
+            GL_UNSIGNED_BYTE,&pixelData[0]);
+    //glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+            //GL_LINEAR_MIPMAP_NEAREST );
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+}
+
 void initGL() {
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
@@ -264,7 +306,10 @@ void initGL() {
     glLoadIdentity();
     glViewport(0, 0, width, height);
     gluPerspective(60.f, width/height, 0.1f, 100000.f);
+    //glOrtho(-20000, 20000.0, -20000, 20000.0, -30.0, 2000);
+
     glMatrixMode(GL_MODELVIEW);
+    loadTexture();
     camera = new Camera(0.0f, 0.0f, 2000.f, 0.f, 0.f);
     camera->posX = 7553.189941;
     camera->posY = -6245.730469;
@@ -276,7 +321,7 @@ void initGL() {
 void drawCurves(bool renderFirst)
 {
     std::vector<Vector3> * controlPoints = renderFirst ? &controlPoints1: &controlPoints2 ;
-    Vector3 color = renderFirst ? Vector3(0.7,0,0.3) : Vector3(1,1,1);
+    Vector3 color = renderFirst ? Vector3(0.7,0,0.3) : Vector3(0.9,0.15,0.15);
 
   if(bDrawCurve)
     BezierCurve::renderCurves(*controlPoints,100,lineWidth,color);
@@ -318,9 +363,25 @@ void display() {
 		camera->lookThrough();
 	}
 
+    /*glDisable(GL_LIGHTING);
+    glLineWidth(15);
+    glColor3f(1.f, 1.0f, 1.0f);
+    glBegin(GL_LINES);
+    glVertex3f(-23469, -19540.000000, -2 );
+    glVertex3f(23469,  -19540.000000, -2);
 
+    glVertex3f(23469, -19540.000000, -2 );
+    glVertex3f(23469,  19540.000000, -2);
+
+    glVertex3f(-23469, -19540.000000, -2 );
+    glVertex3f(-23469,  19540.000000, -2);
+
+    glVertex3f(-23469, 19540.000000, -2 );
+    glVertex3f(23469,  19540.000000, -2);
+
+    glEnd();
        
-    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHTING);*/
     GLfloat lightPos[] = { 0.0, -1.0, 1.0, 0.0 };
     glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
     if(bDrawTerrain)

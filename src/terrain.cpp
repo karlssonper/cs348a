@@ -15,11 +15,12 @@ Terrain::Terrain(char* fileVertices, char* fileTriangles)
   boundsFound = false;
   ReadTerrain (fileVertices);
   ReadTriangles(fileTriangles);
-  CreateNormals();
+
   float scratch;
   getBounds(&scratch,&scratch,
 	    &scratch,&scratch,&scratch,&scratch);
   constructGrid(16,16);
+  CreateNormals();
   CreateColors();
 }
 
@@ -151,13 +152,32 @@ void Terrain::renderTriangles()
       Vector3 x = points[tri.x]; Vector3 cx = colors[tri.x];
       Vector3 y = points[tri.y]; Vector3 cy = colors[tri.x];
       Vector3 z = points[tri.z]; Vector3 cz = colors[tri.x];
-      Vector3 n = normals[i];      
+      Vector3 n = normals[i];
+
+      /*Vector3 nx = vertexNormals[tri.x];
+      Vector3 ny = vertexNormals[tri.y];
+      Vector3 nz = vertexNormals[tri.z];*/
+
+      float ux = uv[tri.x].x;
+      float uy = uv[tri.y].x;
+      float uz = uv[tri.z].x;
+
+      float vx = uv[tri.x].y;
+      float vy = uv[tri.y].y;
+      float vz = uv[tri.z].y;
+
       //glNormal3f(n.x, n.y, n.z);
-      glColor3f(cx.x, cx.y, cx.z);
+      //glColor3f(cx.x, cx.y, cx.z);
+      glTexCoord2f(ux,vx);
+      //glNormal3f(nx.x, nx.y, nx.z);
       glVertex3f(x.x, x.y, x.z);
-      glColor3f(cy.x, cy.y, cy.z);
+      //glColor3f(cy.x, cy.y, cy.z);
+      glTexCoord2f(uy,vy);
+      //glNormal3f(ny.x, ny.y, ny.z);
       glVertex3f(y.x, y.y, y.z);
-      glColor3f(cz.x, cz.y, cz.z);
+      //glColor3f(cz.x, cz.y, cz.z);
+      glTexCoord2f(uz,vz);
+      //glNormal3f(nz.x, nz.y, nz.z);
       glVertex3f(z.x, z.y, z.z);
     }
     glEnd();
@@ -229,6 +249,9 @@ void Terrain::ReadTerrain (char* fileName)
       if (strcmp(buffer, "site") != 0)
 	break;
       points.push_back(Vector3(x,y,z));
+      float u = (x+23469)/(2.0*23469);
+      float v = (y+19540)/(2.0*19540);
+      uv.push_back(Vector3(u,v,1));
     }
 }
 
@@ -284,6 +307,38 @@ void Terrain::CreateNormals()
 		      &nx, &ny, &nz);
       normals.push_back(Vector3(nx,ny,nz));
     }
+
+  /*vertexNormals.resize(points.size());
+  for (int i = 0; i < points.size(); ++i) {
+      //std::cout << "VERTEX NORMAL #" << i << std::endl;
+      Vector3 p = points[i];
+      std::vector<Triangle> tris = getTriangles(p,p);
+      std::cout << tris.size() << std::endl;
+      std::vector<Vector3> neighborTrisNormals;
+      for (int j = 0; j < tris.size(); ++j) {
+          //std::cout << "POSSIBLE NAERBY TRI #" << j << std::endl;
+          if ((tris[j].v1.x == p.x &&
+               tris[j].v1.y == p.y &&
+               tris[j].v1.z == p.z)
+               ||
+               (tris[j].v2.x == p.x &&
+               tris[j].v2.y == p.y &&
+               tris[j].v2.z == p.z)
+               ||
+               (tris[j].v3.x == p.x &&
+               tris[j].v3.y == p.y &&
+               tris[j].v3.z == p.z)) {
+              neighborTrisNormals.push_back(tris[j].n);
+          }
+      }
+
+      Vector3 n;
+      for (int j = 0; j < neighborTrisNormals.size(); ++j) {
+          //std::cout << " NAERBY TRI #" << j << std::endl;
+          n = n + neighborTrisNormals[j];
+      }
+      vertexNormals[i] = n/float(neighborTrisNormals.size());
+  }*/
 }
 
 Vector3 blend(Vector3 c1, Vector3 c2, float f1, float f2, float amount)
