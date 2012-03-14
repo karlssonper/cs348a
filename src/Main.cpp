@@ -95,7 +95,7 @@ void updateTourer(const std::vector<Vector3> &_ctrlpts) {
 	nextPos = BezierCurve::evaluateGlobal(_ctrlpts, tourT+0.001f);
 }
 
-void updateMetrics() {
+void updateLength() {
 	totalLength = BezierCurve::length(controlPoints2, 200);
 	minDistance = BezierCurve::minDistance(controlPoints2, 100, terrain);
 	std::cout << "Total length: " << totalLength << std::endl;
@@ -464,7 +464,7 @@ void keyPressed (unsigned char key, int x, int y) {
 	    render = RENDER_BOTH;
 	    break;
 	case 'b':
-		//updateLength();
+		updateLength();
 		break;
 	case 'n':
 		updateDistance();
