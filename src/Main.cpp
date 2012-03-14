@@ -41,8 +41,10 @@ SightPath * sightPath;
 SightPath2 * sightPath2;
 
 float tourT = 0.f;
-float tourSpeed = 0.005f;
-Vector3 tourPos;
+float tourSpeed = 0.001f;
+Vector3 tourPos, nextPos;
+
+float totalLength, minDistance, maxCurvature;
 
 int currentPoi = 2;
 
@@ -55,6 +57,7 @@ bool bDrawControlPolygonExt = false;
 bool bDrawControlPolyFill = false;
 bool bDrawToursBB = false;
 bool bDrawTourer = true;
+bool bFirstPerson = false;
 bool wasd[4] = {false,false,false,false};
 bool moveTourer [2] = { false, false };
 
@@ -75,6 +78,14 @@ void stepTourer(float _inc) {
 
 void updateTourer(const std::vector<Vector3> &_ctrlpts) {
 	tourPos = BezierCurve::evaluateGlobal(_ctrlpts, tourT);
+	nextPos = BezierCurve::evaluateGlobal(_ctrlpts, tourT+0.001f);
+}
+
+void updateMetrics() {
+	totalLength = BezierCurve::length(controlPoints, 200);
+	minDistance = BezierCurve::minDistance(controlPoints, 100, terrain);
+	std::cout << "Total length: " << totalLength << std::endl;
+	std::cout << "Min distance: " << minDistance << std::endl;
 }
 
 void drawTourer(float _size) {
@@ -213,9 +224,9 @@ void drawCurves()
     drawBoundingTour(&tour);
     
   if(bDrawTourer) {
-	  updateTourer(controlPoints);
 	  drawTourer(300.f);
   }
+  
 
 }
     
@@ -233,7 +244,16 @@ void display() {
 
     glLoadIdentity();
     
-    camera->lookThrough();
+    if (bFirstPerson) {
+		 bDrawTourer = false;
+		 gluLookAt(tourPos.x, tourPos.y, tourPos.z,
+	     nextPos.x, nextPos.y, nextPos.z,
+		 0, 0 , 1);
+	} else {
+		camera->lookThrough();
+	}
+
+
        
     glDisable(GL_LIGHTING);
     /*glBegin(GL_LINES);
@@ -256,6 +276,7 @@ void display() {
     if (bDrawTours)
         drawTour(&tour);
     
+    updateTourer(controlPoints);
     drawCurves();
     //drawMinimap();
 
@@ -295,6 +316,7 @@ void printInfo()
          "  |    Press 'a/d' - Strafe left/right                    |\n"
          "  |    Press 'c'   - Cycle Point of Interest              |\n"
          "  |    Press 'r'   - Remove Point of Interest             |\n"
+         "  |    Press 'f'   - Toggle first person mode             |\n"
          "  |                                                       |\n"
          "  |    Press '1' - Toggle Terrain                         |\n"
          "  |    Press '2' - Toggle Sights                          |\n"
@@ -304,7 +326,7 @@ void printInfo()
          "  |    Press '6' - Toggle Control Polygon Extended        |\n"
          "  |    Press '7' - Toggle Control Polygon Filled          |\n"
          "  |    Press '8' - Toggle Sights Bounding Boxsed          |\n"
-         "  |    Press '9' - Toggle Tourer                          |\n"
+         "  |    Press '9' - Toggle Tourer Box                      |\n"
          "  |                                                       |\n"
          "  |    Press 'esc' - Quit                                 |\n"
          "  ---------------------------------------------------------"
@@ -320,7 +342,6 @@ void keyPressed (unsigned char key, int x, int y) {
     case '2':
         bDrawTours = !bDrawTours;
         break;
-
     case '3':
         bDrawCurve = !bDrawCurve;
         break;
@@ -365,6 +386,9 @@ void keyPressed (unsigned char key, int x, int y) {
 		break;
 	case 'e':
 		moveTourer[1] = true;
+		break;
+	case 'f':
+		bFirstPerson = !bFirstPerson;
 		break;
     }
 }
@@ -447,6 +471,7 @@ int main(int argc, char **argv)
     createSightPaths();
 
     printf("everything made\n");
+    
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
     glutInitWindowSize(width, height);
@@ -460,6 +485,7 @@ int main(int argc, char **argv)
     glutMotionFunc(mouseFunc);
     glutPassiveMotionFunc(mouseMoveFunc);
     printInfo();
+    updateMetrics();
     glutMainLoop();
     return 0;
 }
