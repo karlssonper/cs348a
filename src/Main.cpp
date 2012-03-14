@@ -394,7 +394,7 @@ void printInfo()
          "  |    Press '5' - Toggle Control Polygon                 |\n"
          "  |    Press '6' - Toggle Control Polygon Extended        |\n"
          "  |    Press '7' - Toggle Control Polygon Filled          |\n"
-         "  |    Press '8' - Toggle Sights Bounding Boxsed          |\n"
+         "  |    Press '8' - Toggle Sights Bounding Box             |\n"
          "  |    Press '9' - Toggle Tourer Box                      |\n"
          "  |                                                       |\n"
          "  |    Press 'esc' - Quit                                 |\n"
