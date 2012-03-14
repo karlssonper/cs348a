@@ -597,9 +597,10 @@ void createSightPaths()
 
     sightPath2 = new SightPath2(terrain, tour);
     sightPath2->createPath();
-    sightPath2->print();
 
     updateControlPoints();
+    //sightPath2->print();
+
 }
 
 int main(int argc, char **argv)

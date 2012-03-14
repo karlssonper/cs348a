@@ -154,7 +154,7 @@ void SightPath2::print()
   for(int i = 0; i < cps.size(); i++)
     {
       Vector3 cp = cps[i];
-      printf("  Control Point (%i): (%f,%f,%f)\n",cp.x,cp.y,cp.z);
+      printf("  Control Point (%i): (%5.1f,%5.1f,%5.1f)\n",i,cp.x,cp.y,cp.z);
     }
   printf("\n");
 }
