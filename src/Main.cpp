@@ -188,7 +188,7 @@ void addSight()
     }
     //add!
     sightPath->addSight(Vector3(x,y,z), idx);
-    controlPoints2 = sightPath->controlPoints();
+    activeControlPoints = sightPath->controlPoints();
     wasd[0] = false;
     wasd[1] = false;
     wasd[2] = false;
@@ -213,7 +213,7 @@ void removeSight()
     std::cout << "........\nRemoving sight #" << idx << std::endl;
     //remove!
     sightPath->removeSight(idx);
-    controlPoints2 = sightPath->controlPoints();
+    activeControlPoints = sightPath->controlPoints();
     wasd[0] = false;
     wasd[1] = false;
     wasd[2] = false;
