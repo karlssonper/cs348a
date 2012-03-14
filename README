@@ -1,35 +1,70 @@
+CS348a - Final Project
+
+Per Karlsson (perk@stanford.edu)
+Victor Sand (vsand@stanford.edu)
+Steve Lesser (sklesser@stanford.edu)
+
+Here is our write-up for the final project flight path program.
+
+=========== Part A: MinMaxer for triangulation ==============
+
+<<TODO>>
+
+============= Part B: Planning a Smooth Tour  ===============
+
+To compute our tour we used the previously attained triangulation data, a loaded list of points of interest (POIs) and a math engine capable of detecting collisions on the terrain with points, line segments, and bezier curves. Our algorithm proceeded as follows:
+
+Initialize a control point midway between each POI and raised a fraction of the total length of the distance between the control points
+
+For each POI p except the first and last:
+  Get the midway control point cp0 previous to p
+  Get the midway control point cp2 following p
+  Form a plane P with the points cp0,p,cp2
+  Create vectors v1=(p-cp0).normalize and v2=(p-cp2).normalize
+  Expand a triangle from point p which lies in plane P with the given constraints:
+    One vertex t1 lies in the line p+(v1+v2)*a where a is a scalar
+    One vertex t0 lies in the line segment from t1 to cp0
+    One vertex t2 lies in the line segment from t1 to cp2
+    t1 and t2 are equidistant from t0
+    p lies in the center of t0,t1,t2
+  Place control points at t0, t1 and t2
+  if collision is detected or curvature is extreme:
+     Move control points cp0 and cp2 up in the air or away from each other and recursively perform this same algorithm on their adjacent POI
+
+endFor
+
+For the first and last POI:
+    set a control point at the POI
+endFor
+
+The reasoning behind this algorithm is that it is generally safest for a flight to never go lower than it absolutely has to, hence the POI should be the lowest points on the local curve. To ensure this a bezier curve is formed around each POI such that the lowest point intersects the POI. One way to accomplish this is to form a triangle around the POI with the POI lying the the center of it so if the triangle's vertices were control points of a bezier curve, the curve would intersect the POI at t=0.5 interpolation. In order for this to work out, an additional control point must be added between each pair of POI so there is a longer "travel curve" between each pair of POIs and a shorter "dive curve" around each POI. 
+
+The algorithm is essentially a way to effeciently construct these requirements by looking at a single POI and the two adjacent "travel curve" control points at a time. The rest of the algorithm arises naturally from ensuring C1 continuity and staying within particular fixed planes.
+
+To avoid collisions, we detect collisions along the candidate bezier curves of each POI and the following "travel curve." Collisions are effeciently found with the aid of a uniform grid spatial data structure. If collisions are found we adjust the positions of the midpoint control points since raising them generates a more dramatic dive for the adjacent control points and allows the flight to move over more obstacles. The control points are then re-evaluated for each adjacent POI. Similarly, extreme curvatures are handled by detecting when a curve creates a curvature greater than a specified minimum, and if so the mid control points are moved away from each other so there is more space between control points and a gentler curve.
+
+For our tour we computed a length 182622, a maximum curvature of 0.272, and a minimum distance from the ground of 54.3. We used a d=100 size bounding cube of region to collide with as a valid hit with the POI.
+
+=============== Part C: Viewing the Tour ====================
+
+We created our program using GLUT to offer capabilities of animation, user input, and multiple views. We render our terrain using a texture map we obtained from Google Maps and warped in photoshop to align with the given data. Multiple views can be toggled including a minimap showing an overall view of the area. Additionally points can be added and removed by interacting with the command line.
+
+============== Part D: On the Fly Changes ===================
+
+Our algorithm constructs the path by iterating through the POIs and locally constructing the control points around the POI. Hence to remove a POI we need only remove it and then reconstruct the two adjacent POIs. To add a POI we add a new midpoint and construct the two new path segment surrounding the new POI and reconstruct the previous two adjacent POIs (since their midpoints relative to the now moved point have changed).
+
+
+
+========== Part E: Tours for Unordered Sites ================
+
+
+
+=========== Part A: MinMaxer for triangulation ==============
+
+
+
 command of doom:
 mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=DEBUG -DCMAKE_INSTALL_PREFIX=.. .. && make install
 
 setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:$HOME/Dev/cs348a/project.git/lib
-
-  ---------------------------------------------------------
-  |      ___     ___     ____   _ _      ___              |
-  |     / __|   / __|   |__ /  | | |    ( _ )   __ _      |
-  |    | (__    \__ \    |_ \  |_  _|   / _ \  / _` |     |
-  |     \___|   |___/   |___/   _|_|_   \___/  \__,_|     |
-  |   _|"""""|_|"""""|_|"""""|_|"""""|_|"""""|_|"""""|    |
-  |    '-0-0-'"'-0-0-'"'-0-0-'"'-0-0-'"'-0-0-'"'-0-0-"    |
-  |         (yes, that is a train. Let's go train!        |
-  |                                                       |
-  | Stanford cs348a - Geometric Modeling                  |
-  |                  Final Project                        |
-  |       by Per Karlsson  - perk@stanford.edu            |
-  |          Victor Sand   - vsand@stanford.edu           |
-  |          Steven Lesser - sklesser@stanford.edu        |
-  |                                                       |
-  |    Mouse       - Rotate Camera view                   |
-  |    Press 'w/s' - Walk forward/backwards               |
-  |    Press 'a/d' - Strafe left/right                    |
-  |                                                       |
-  |    Press '1' - Toggle Terrain                         |
-  |    Press '2' - Toggle Sights                          |
-  |    Press '3' - Toggle Sight Path                      |
-  |    Press '4' - Toggle Control Points                  |
-  |    Press '5' - Toggle Control Polygon                 |
-  |    Press '6' - Toggle Control Polygon Extended        |
-  |    Press '7' - Toggle Control Polygon Filled          |
-  |                                                       |
-  |    Press 'esc' - Quit                                 |
-  ---------------------------------------------------------
 

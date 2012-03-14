@@ -22,7 +22,7 @@ using namespace std;
 int width = 800;
 int height = 600;
 
-int miniWidth = 200;
+int miniWidth = 150;
 int miniHeight = 150;
 
 vector<int> x;
@@ -50,6 +50,8 @@ Vector3 tourPos, nextPos;
 float totalLength, minDistance, maxCurvature;
 int numberOfCurves;
 
+float lineWidth = 5.f;
+
 enum RenderEnum{
     RENDER_SIGHTPATH1,
     RENDER_SIGHTPATH2,
@@ -74,7 +76,7 @@ bool moveTourer [2] = { false, false };
 GLuint texID;
 
 void reshape(int x, int y);
-void drawCurves();
+void drawCurves(bool);
 void display();
 
 void updateControlPoints()
@@ -214,18 +216,22 @@ void drawMinimap()
   glEnable(GL_LIGHTING);
   glScissor(0,0,miniWidth,miniHeight);
   glEnable(GL_SCISSOR_TEST);
-  glClear(GL_DEPTH_BUFFER_BIT);
+  glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   glViewport(0, 0, miniWidth, miniHeight);
-  glOrtho(-20000, 20000.0, -20000, 20000.0, -30.0, 2000);
+  glOrtho(-18000.f, 18000.f, -18000.f, 18000.f, 10.0f, 10000.f);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  gluLookAt(0000.0, 0000.0, 0000.0,
-	    0.0, 0.0, 1.0,
+  gluLookAt(0.0, 0.0, 5000.0,
+	    0.0, 0.0, -1.0,
 	    0.0, 1.0, 0.0);
   //  camera->lookThrough();
-  //drawCurves();
+  float saved = lineWidth;
+  glDisable(GL_LIGHTING);
+  BezierCurve::renderCurves(controlPoints2,100,1.5f,Vector3(1.f,1.f,1.f));
+  drawTourer(1000.f);
+  glEnable(GL_LIGHTING);
   drawTriangles();
   reshape(width,height);
   glDisable(GL_SCISSOR_TEST);
@@ -318,7 +324,7 @@ void drawCurves(bool renderFirst)
     Vector3 color = renderFirst ? Vector3(0.7,0,0.3) : Vector3(1,1,1);
 
   if(bDrawCurve)
-    BezierCurve::renderCurves(*controlPoints,100,3.f,color);
+    BezierCurve::renderCurves(*controlPoints,100,lineWidth,color);
   
   if (bDrawControlPoints)
     BezierCurve::renderCtrlPts(*controlPoints, 60);
@@ -330,7 +336,7 @@ void drawCurves(bool renderFirst)
     BezierCurve::renderCtrlPolyExt(*controlPoints,4.f);
   
   if (bDrawControlPolyFill)
-    BezierCurve::renderCtrlPolyFill(*controlPoints);
+  BezierCurve::renderCtrlPolyFill(*controlPoints);
 
 }
     
@@ -406,7 +412,7 @@ void display() {
             drawCurves(false);
             break;
     }
-    //drawMinimap();
+    drawMinimap();
 
     glutSwapBuffers();
 }
@@ -455,7 +461,7 @@ void printInfo()
          "  |    Press '5' - Toggle Control Polygon                 |\n"
          "  |    Press '6' - Toggle Control Polygon Extended        |\n"
          "  |    Press '7' - Toggle Control Polygon Filled          |\n"
-         "  |    Press '8' - Toggle Sights Bounding Boxsed          |\n"
+         "  |    Press '8' - Toggle Sights Bounding Box             |\n"
          "  |    Press '9' - Toggle Tourer Box                      |\n"
          "  |                                                       |\n"
          "  |    Press 'esc' - Quit                                 |\n"
@@ -607,7 +613,7 @@ int main(int argc, char **argv)
     srand(0);
     parseTour("../data/hw4.tour", &tour);
     cout << "Parsed tour, found " << tour.size()/3 << " sights" << endl;
-    tour = optimalSightPath(tour);
+    //tour = optimalSightPath(tour);
 
     terrain = new Terrain("../src/sample.mesh3","../src/sample.triangles3");
     printf("terrain loaded\n");

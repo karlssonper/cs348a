@@ -289,6 +289,16 @@ void SightPath2::removeSight(int index)
   isPathValid_ = 0;
 }
 
+inline float biMin(float a, float b)
+{
+  return (a < b) ? a : b;
+}
+
+inline float triMin(float a, float b, float c)
+{
+  return biMin(biMin(a,b), biMin(b,c));
+}
+
 int SightPath2::solveMidSegment(int index, bool optimize)
 {
   if (index <= 0 || index >= numSights()-1)
@@ -307,6 +317,8 @@ int SightPath2::solveMidSegment(int index, bool optimize)
       Vector3 v1 = (poi - cp0).normalize();
       Vector3 v2 = (poi - cp2).normalize();
       Vector3 v = (v1+v2).normalize();
+      //if ((poi-cp0).mag() < 10000.f || (poi-cp2).mag() < 10000.f)
+      scaleFactor = triMin(scaleFactor, (poi-cp0).mag()/10.f, (poi-cp2).mag()/10.f);
       cp1 = poi + v*scaleFactor; // control point for current site
       Vector3 v3 = (cp0-cp1).normalize(); // vector from cp1 back to cp0
       Vector3 v4 = (cp2-cp1).normalize(); // vector from cp1 forward to cp2
@@ -342,7 +354,7 @@ int SightPath2::solveMidSegment(int index, bool optimize)
       doesIntersect = intersects1 | intersects2;
       if (doesIntersect)
 	{
-	  //printf("intersection!!! for index (%i)\n",index);
+	  printf("intersection!!! for index (%i)\n",index);
 	  Vector3 moveAmount = Vector3(0,0,100.f);
 	  moveMidpoint(index-1,moveAmount);
 	  moveMidpoint(index,moveAmount);
