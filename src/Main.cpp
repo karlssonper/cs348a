@@ -28,6 +28,7 @@ vector<int> x;
 vector<int> y;
 vector<int> z;
 vector<Vector3> tour;
+vector<Vector3> tourColors;
 vector<Vector3> controlPoints;
 triangleList *tl;
 char *g;
@@ -37,6 +38,9 @@ int mouseX, mouseY;
 
 Terrain *terrain;
 SightPath * sightPath;
+SightPath2 * sightPath2;
+
+int currentPoi = 2;
 
 bool bDrawTerrain = true;
 bool bDrawTours = true;
@@ -45,10 +49,12 @@ bool bDrawControlPoints = true;
 bool bDrawControlPolygon = false;
 bool bDrawControlPolygonExt = false;
 bool bDrawControlPolyFill = false;
+bool bDrawToursBB = false;
 bool wasd[4] = {false,false,false,false};
 
 void reshape(int x, int y);
-
+void drawCurves();
+void display();
 void drawTriangles()
 {
   glColor3f(1.f, 1.f, 1.f);
@@ -56,13 +62,26 @@ void drawTriangles()
 }
 
 void drawTour(vector<Vector3> *tour) {
-  glColor3f(1.f, 0.f, 0.f);
   for (int i=0; i<tour->size(); ++i) {
     glPushMatrix();
     glTranslatef(tour->at(i).x, tour->at(i).y, tour->at(i).z);
-    glutSolidSphere(50, 50, 50);
+    glColor3f(tourColors[i].x,tourColors[i].y,tourColors[i].z);
+    glutSolidCube(50);
     glPopMatrix();
   }
+}
+
+void drawBoundingTour(vector<Vector3> *tour) {
+    glEnable (GL_BLEND);
+    glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    for (int i=0; i<tour->size(); ++i) {
+    glPushMatrix();
+    glTranslatef(tour->at(i).x, tour->at(i).y, tour->at(i).z);
+    glColor4f(tourColors[i].x,tourColors[i].y,tourColors[i].z,0.3f);
+    glutSolidCube(2*D);
+    glPopMatrix();
+    }
+    glDisable(GL_BLEND);
 }
 
 void drawMinimap()
@@ -74,17 +93,31 @@ void drawMinimap()
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   glViewport(0, 0, miniWidth, miniHeight);
-  glOrtho(0.0, 10000.0, 0.0, 10000.0, 1.0, 10000);
+  glOrtho(-20000, 20000.0, -20000, 20000.0, -30.0, 2000);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  gluLookAt(5000.0, 5000.0, 5000.0,
-	    5000.0, 5000.0, 0.0,
+  gluLookAt(0000.0, 0000.0, 0000.0,
+	    0.0, 0.0, 1.0,
 	    0.0, 1.0, 0.0);
   //  camera->lookThrough();
+  //drawCurves();
   drawTriangles();
   reshape(width,height);
   glDisable(GL_SCISSOR_TEST);
   glDisable(GL_LIGHTING);
+}
+
+void removePoi()
+{
+  currentPoi = currentPoi % sightPath2->numSights();
+  printf("Removing POI(%i)\n",currentPoi);
+  sightPath2->removeSight(currentPoi);
+  controlPoints = sightPath2->controlPoints();
+}
+
+void cyclePoi()
+{
+  currentPoi = (currentPoi+1) % sightPath2->numSights();  
 }
 
 void parseTour(string filename,
@@ -99,6 +132,10 @@ void parseTour(string filename,
             infile >> ztemp;
             if (infile.eof()) break;
             tour->push_back(Vector3(xtemp,ytemp,ztemp));
+            tourColors.push_back(Vector3(
+                    rand() / (float)RAND_MAX,
+                    rand() / (float)RAND_MAX,
+                    rand() / (float)RAND_MAX));
         }
     } else {
         cout << filename << " could not be opened" << endl;
@@ -109,21 +146,50 @@ void parseTour(string filename,
 void initGL() {
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
-    glClearColor(0.2f, 0.2f, 0.2f, 1.f);
+    //glClearColor(0.2f, 0.2f, 0.2f, 1.f);
     glEnable(GL_DEPTH_TEST);
     glMatrixMode(GL_PROJECTION);
+    glShadeModel(GL_SMOOTH);
     glLoadIdentity();
     glViewport(0, 0, width, height);
     gluPerspective(60.f, width/height, 0.1f, 100000.f);
     glMatrixMode(GL_MODELVIEW);
     camera = new Camera(0.0f, 0.0f, 2000.f, 0.f, 0.f);
+    camera->posX = 7553.189941;
+    camera->posY = -6245.730469;
+    camera->posZ = 14367.314453;
+    camera->yaw = 142.399872;
+    camera->pitch = 36.799988;
+}
+
+void drawCurves()
+{
+  if(bDrawCurve)
+    BezierCurve::renderCurves(controlPoints,5000,3.f);
+  
+  if (bDrawControlPoints)
+    BezierCurve::renderCtrlPts(controlPoints, 60);
+  
+  if (bDrawControlPolygon)
+    BezierCurve::renderCtrlPoly(controlPoints,4.f);
+  
+  if(bDrawControlPolygonExt)
+    BezierCurve::renderCtrlPolyExt(controlPoints,4.f);
+  
+  if (bDrawControlPolyFill)
+    BezierCurve::renderCtrlPolyFill(controlPoints);
+
+  if(bDrawToursBB)
+    drawBoundingTour(&tour);
+
 }
     
 void display() {
-    if (wasd[0]) camera->walkForward(20.f);
-    if (wasd[1]) camera->walkBackwards(20.f);
-    if (wasd[2]) camera->strafeLeft(10.f);
-    if (wasd[3]) camera->strafeRight(10.f);
+  float scale = 10.f;
+    if (wasd[0]) camera->walkForward(20.f*scale);
+    if (wasd[1]) camera->walkBackwards(20.f*scale);
+    if (wasd[2]) camera->strafeLeft(10.f*scale);
+    if (wasd[3]) camera->strafeRight(10.f*scale);
 
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -145,33 +211,17 @@ void display() {
         glVertex3d(0.f, 0.f, 100000.f);
     glEnd();*/
     glEnable(GL_LIGHTING);
-
     GLfloat lightPos[] = { 0.0, -1.0, 1.0, 0.0 };
     glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
-
-
     if(bDrawTerrain)
         drawTriangles();
     glDisable(GL_LIGHTING);
     if (bDrawTours)
         drawTour(&tour);
 
-    if(bDrawCurve)
-        BezierCurve::renderCurves(controlPoints,5000,3.f);
+    drawCurves();
+    //drawMinimap();
 
-    if (bDrawControlPoints)
-        BezierCurve::renderCtrlPts(controlPoints, 60);
-
-    if (bDrawControlPolygon)
-        BezierCurve::renderCtrlPoly(controlPoints,4.f);
-
-    if(bDrawControlPolygonExt)
-        BezierCurve::renderCtrlPolyExt(controlPoints,4.f);
-
-    if (bDrawControlPolyFill)
-        BezierCurve::renderCtrlPolyFill(controlPoints);
-
-    drawMinimap();
     glEnable(GL_LIGHTING);
 
     glutSwapBuffers();
@@ -206,6 +256,8 @@ void printInfo()
          "  |    Mouse       - Rotate Camera view                   |\n"
          "  |    Press 'w/s' - Walk forward/backwards               |\n"
          "  |    Press 'a/d' - Strafe left/right                    |\n"
+         "  |    Press 'c'   - Cycle Point of Interest              |\n"
+         "  |    Press 'r'   - Remove Point of Interest             |\n"
          "  |                                                       |\n"
          "  |    Press '1' - Toggle Terrain                         |\n"
          "  |    Press '2' - Toggle Sights                          |\n"
@@ -214,6 +266,7 @@ void printInfo()
          "  |    Press '5' - Toggle Control Polygon                 |\n"
          "  |    Press '6' - Toggle Control Polygon Extended        |\n"
          "  |    Press '7' - Toggle Control Polygon Filled          |\n"
+         "  |    Press '8' - Toggle Sights Bounding Boxsed          |\n"
          "  |                                                       |\n"
          "  |    Press 'esc' - Quit                                 |\n"
          "  ---------------------------------------------------------"
@@ -245,6 +298,9 @@ void keyPressed (unsigned char key, int x, int y) {
     case '7':
         bDrawControlPolyFill = !bDrawControlPolyFill;
         break;
+    case '8':
+        bDrawToursBB = !bDrawToursBB;
+        break;
     case 'w':
         wasd[0] = true;
         break;
@@ -257,6 +313,12 @@ void keyPressed (unsigned char key, int x, int y) {
     case 'd':
         wasd[3] = true;
         break;
+    case 'r':
+      removePoi();
+      break;
+    case 'c':
+      cyclePoi();
+      break;
     }
 }
 
@@ -293,6 +355,22 @@ void mouseMoveFunc(int x,int y)
     mouseY = y;
 }
 
+void createSightPaths()
+{
+  /*// create sight path 1
+  printf("sight path loaded\n");
+  sightPath->createConstraintTangents();
+  printf("constraint trangents made\n");
+  sightPath->createControlPoints();
+  printf("control points created\n");
+  //controlPoints = sightPath->controlPoints();*/
+
+  // create sight path 1
+  printf("sight path loaded\n");
+  sightPath2->createPath();
+  controlPoints = sightPath2->controlPoints();
+}
+
 int main(int argc, char **argv)
 {
   /*parsePoints("../data/hw4.heights", &x, &y, &z, n);
@@ -302,20 +380,19 @@ int main(int argc, char **argv)
     delaunay1(g);
     copyGraphToListOfTriangles(g, &tl);
 */
+    srand(0);
     parseTour("../data/hw4.tour", &tour);
     cout << "Parsed tour, found " << tour.size()/3 << " sights" << endl;
 
     terrain = new Terrain("../src/sample.mesh3","../src/sample.triangles3");
     printf("terrain loaded\n");
-    tour.resize(9);
-    sightPath = new SightPath(terrain, tour);
-    printf("sight path loaded\n");
-    sightPath->createConstraintTangents();
-    printf("constraint trangents made\n");
-    sightPath->createControlPoints();
-    printf("control points created\n");
-    controlPoints = sightPath->controlPoints();
     terrain->print();
+
+    //tour.resize(9);
+    sightPath = new SightPath(terrain, tour);
+    sightPath2 = new SightPath2(terrain, tour);    
+    createSightPaths();
+
     printf("everything made\n");
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
