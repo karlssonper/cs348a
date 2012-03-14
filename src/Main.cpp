@@ -44,10 +44,11 @@ SightPath1 * sightPath1;
 SightPath2 * sightPath2;
 
 float tourT = 0.f;
-float tourSpeed = 0.001f;
+float tourSpeed = 0.0005f;
 Vector3 tourPos, nextPos;
 
 float totalLength, minDistance, maxCurvature;
+int numberOfCurves;
 
 enum RenderEnum{
     RENDER_SIGHTPATH1,
@@ -84,11 +85,6 @@ void stepTourer(float _inc) {
 	tourT += _inc;
 	if (tourT >= 1.f) tourT = 0.0001f;
 	else if (tourT < 0.f) tourT = 0.9999f;
-	//std::cout << "t=" << tourT << std::endl;
-	//std::cout << "nofctrlpts=" << controlPoints.size() << std::endl;
-	//for (int i=0; i<controlPoints.size(); ++i) {
-	//	std::cout << controlPoints.at(i).x << " " << controlPoints.at(i).y << " " << controlPoints.at(i).z << std::endl;
-	//}
 }
 
 void updateTourer(const std::vector<Vector3> &_ctrlpts) {
@@ -96,7 +92,7 @@ void updateTourer(const std::vector<Vector3> &_ctrlpts) {
 	nextPos = BezierCurve::evaluateGlobal(_ctrlpts, tourT+0.001f);
 }
 
-void updateMetrics() {
+void updateLength() {
 	totalLength = BezierCurve::length(controlPoints2, 200);
 	minDistance = BezierCurve::minDistance(controlPoints2, 100, terrain);
 	std::cout << "Total length: " << totalLength << std::endl;
@@ -108,8 +104,13 @@ void updateDistance() {
 }
 
 void updateCurvature() {
-	maxCurvature = BezierCurve::maxCurvature(controlPoints2, 10000, 0.0000001);
+	maxCurvature = BezierCurve::maxCurvature(controlPoints2, 1000, 0.001);
 	std::cout << "Max curvature: " << maxCurvature << std::endl;
+}
+
+void updateNrCurves() {
+	numberOfCurves = (controlPoints2.size()-1)/2;
+	std::cout << "Nr of curves: " << numberOfCurves << std::endl;
 }
 
 void drawTourer(float _size) {
@@ -287,7 +288,7 @@ void drawCurves(bool renderFirst)
 }
     
 void display() {
-  float scale = 1.f;
+  float scale = 2.f;
     if (wasd[0]) camera->walkForward(20.f*scale);
     if (wasd[1]) camera->walkBackwards(20.f*scale);
     if (wasd[2]) camera->strafeLeft(10.f*scale);
@@ -379,6 +380,7 @@ void printInfo()
          "  |    Press 'c'   - Add New Sight                        |\n"
          "  |    Press 'r'   - Remove Sight                         |\n"
          "  |    Press 'f'   - Toggle first person mode             |\n"
+		 "  |    Press 'v'   - Calculate number of arcs             |\n"
 		 "  |    Press 'b'   - Calculate total length               |\n"
 		 "  |    Press 'n'   - Calculate min distance               |\n"
 		 "  |    Press 'm'   - Calculate max curvature              |\n"
@@ -465,13 +467,16 @@ void keyPressed (unsigned char key, int x, int y) {
 	    render = RENDER_BOTH;
 	    break;
 	case 'b':
-		//updateLength();
+		updateLength();
 		break;
 	case 'n':
 		updateDistance();
 		break;
 	case 'm':
 		updateCurvature();
+		break;
+	case 'v':
+		updateNrCurves();
 		break;
     }
 }
