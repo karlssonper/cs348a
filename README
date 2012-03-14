@@ -8,7 +8,11 @@ Here is our write-up for the final project flight path program.
 
 =========== Part A: MinMaxer for triangulation ==============
 
-<<TODO>>
+For triangulation we used the Delaunay1 algorithm on the given heightfield. We found it to be sufficiently fast for our purposes and noticably faster than the minmaxSlope despite no visual difference. Some of the other choices were not used due to them ignoring the z-value.
+
+<<<TODO>>>: Why Delaunay1???
+
+Interfacing with MinMaxer involved modifying their sample files to read in our given heightfield data and then modifying a triangle printing function to dump the generated triangles to a data file. These values are then read into our program on launch and used to generate a Terrain class which assembles the data into a uniform grid for efficient collision detection and adds texture coordinates so we can map a Google Maps image of the area onto the terrain.
 
 ============= Part B: Planning a Smooth Tour  ===============
 
@@ -49,19 +53,24 @@ For our tour we computed a length 182622, a maximum curvature of 0.272, and a mi
 
 We created our program using GLUT to offer capabilities of animation, user input, and multiple views. We render our terrain using a texture map we obtained from Google Maps and warped in photoshop to align with the given data. Multiple views can be toggled including a minimap showing an overall view of the area. Additionally points can be added and removed by interacting with the command line.
 
+Our animation is done by evaluating the bezier curves in order and using gluLookAt to set the current position as a position on the curve and the point to look as a point a little further ahead of the current point. This gives a roller coaster effect and is pretty fun. A top-down orthographic minimap is provided to visualize the global progress of the camera. We render the POIs as multiple colored boxes and additionally render each control point with a green box to better visualize the construction of the quad.
+
 ============== Part D: On the Fly Changes ===================
 
 Our algorithm constructs the path by iterating through the POIs and locally constructing the control points around the POI. Hence to remove a POI we need only remove it and then reconstruct the two adjacent POIs. To add a POI we add a new midpoint and construct the two new path segment surrounding the new POI and reconstruct the previous two adjacent POIs (since their midpoints relative to the now moved point have changed).
 
-
-
 ========== Part E: Tours for Unordered Sites ================
 
+<<TODO>>
 
 
-=========== Part A: MinMaxer for triangulation ==============
 
 
+
+
+
+
+// Often used commands!
 
 command of doom:
 mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=DEBUG -DCMAKE_INSTALL_PREFIX=.. .. && make install

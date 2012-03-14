@@ -147,6 +147,18 @@ SightPath2::SightPath2(const Terrain * terrain,
   createMidpoints();
 }
 
+void SightPath2::print()
+{
+  printf("Printing Path 2:\n\n");
+  std::vector<Vector3> cps = controlPoints();
+  for(int i = 0; i < cps.size(); i++)
+    {
+      Vector3 cp = cps[i];
+      printf("  Control Point (%i): (%f,%f,%f)\n",cp.x,cp.y,cp.z);
+    }
+  printf("\n");
+}
+
 void SightPath2::createMidpoints()
 {
   midpoints_.clear();

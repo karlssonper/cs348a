@@ -76,6 +76,7 @@ public:
     int moveMidpoint(int index, Vector3 diff);
     void addSight(Vector3 pos, int prevSightIdx);
     const std::vector<Vector3> controlPoints();
+    void print();
 private:
     void createMidpoints();
     int solveSiteSegment(int index, bool optimize=false);    

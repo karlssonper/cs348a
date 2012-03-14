@@ -536,6 +536,7 @@ void createSightPaths()
 
     sightPath2 = new SightPath2(terrain, tour);
     sightPath2->createPath();
+    sightPath2->print();
 
     updateControlPoints();
 }
