@@ -40,6 +40,12 @@ Terrain *terrain;
 SightPath * sightPath;
 SightPath2 * sightPath2;
 
+float tourT = 0.f;
+float tourSpeed = 0.001f;
+Vector3 tourPos, nextPos;
+
+float totalLength, minDistance, maxCurvature;
+
 int currentPoi = 2;
 
 bool bDrawTerrain = true;
@@ -50,11 +56,46 @@ bool bDrawControlPolygon = false;
 bool bDrawControlPolygonExt = false;
 bool bDrawControlPolyFill = false;
 bool bDrawToursBB = false;
+bool bDrawTourer = true;
+bool bFirstPerson = false;
 bool wasd[4] = {false,false,false,false};
+bool moveTourer [2] = { false, false };
 
 void reshape(int x, int y);
 void drawCurves();
 void display();
+
+void stepTourer(float _inc) {
+	tourT += _inc;
+	if (tourT >= 1.f) tourT = 0.0001f;
+	else if (tourT < 0.f) tourT = 0.9999f;
+	//std::cout << "t=" << tourT << std::endl;
+	//std::cout << "nofctrlpts=" << controlPoints.size() << std::endl;
+	//for (int i=0; i<controlPoints.size(); ++i) {
+	//	std::cout << controlPoints.at(i).x << " " << controlPoints.at(i).y << " " << controlPoints.at(i).z << std::endl;
+	//}
+}
+
+void updateTourer(const std::vector<Vector3> &_ctrlpts) {
+	tourPos = BezierCurve::evaluateGlobal(_ctrlpts, tourT);
+	nextPos = BezierCurve::evaluateGlobal(_ctrlpts, tourT+0.001f);
+}
+
+void updateMetrics() {
+	totalLength = BezierCurve::length(controlPoints, 200);
+	minDistance = BezierCurve::minDistance(controlPoints, 100, terrain);
+	std::cout << "Total length: " << totalLength << std::endl;
+	std::cout << "Min distance: " << minDistance << std::endl;
+}
+
+void drawTourer(float _size) {
+	glPushMatrix();
+	glTranslatef(tourPos.x, tourPos.y, tourPos.z);
+	glColor3f(1.f, 0.f, 1.f);
+	glutSolidCube(_size);
+	glPopMatrix();
+}
+
 void drawTriangles()
 {
   glColor3f(1.f, 1.f, 1.f);
@@ -218,6 +259,11 @@ void drawCurves()
 
   if(bDrawToursBB)
     drawBoundingTour(&tour);
+    
+  if(bDrawTourer) {
+	  drawTourer(300.f);
+  }
+  
 
 }
     
@@ -227,13 +273,25 @@ void display() {
     if (wasd[1]) camera->walkBackwards(20.f*scale);
     if (wasd[2]) camera->strafeLeft(10.f*scale);
     if (wasd[3]) camera->strafeRight(10.f*scale);
+    if (moveTourer[0]) stepTourer(tourSpeed);
+    if (moveTourer[1]) stepTourer(-tourSpeed);
 
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glLoadIdentity();
     
-    camera->lookThrough();
+    if (bFirstPerson) {
+		 bDrawTourer = false;
+		 gluLookAt(tourPos.x, tourPos.y, tourPos.z,
+	     nextPos.x, nextPos.y, nextPos.z,
+		 0, 0 , 1);
+	} else {
+		camera->lookThrough();
+	}
+
+
+       
     glEnable(GL_LIGHTING);
     GLfloat lightPos[] = { 0.0, -1.0, 1.0, 0.0 };
     glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
@@ -242,7 +300,8 @@ void display() {
     glDisable(GL_LIGHTING);
     if (bDrawTours)
         drawTour(&tour);
-
+    
+    updateTourer(controlPoints);
     drawCurves();
     //drawMinimap();
 
@@ -280,7 +339,7 @@ void printInfo()
          "  |    Press 'a/d' - Strafe left/right                    |\n"
          "  |    Press 'c'   - Add New Sight                        |\n"
          "  |    Press 'r'   - Remove Sight                         |\n"
-         "  |                                                       |\n"
+         "  |    Press 'f'   - Toggle first person mode             |\n"
          "  |    Press '1' - Toggle Terrain                         |\n"
          "  |    Press '2' - Toggle Sights                          |\n"
          "  |    Press '3' - Toggle Sight Path                      |\n"
@@ -289,6 +348,7 @@ void printInfo()
          "  |    Press '6' - Toggle Control Polygon Extended        |\n"
          "  |    Press '7' - Toggle Control Polygon Filled          |\n"
          "  |    Press '8' - Toggle Sights Bounding Boxsed          |\n"
+         "  |    Press '9' - Toggle Tourer Box                      |\n"
          "  |                                                       |\n"
          "  |    Press 'esc' - Quit                                 |\n"
          "  ---------------------------------------------------------"
@@ -304,7 +364,6 @@ void keyPressed (unsigned char key, int x, int y) {
     case '2':
         bDrawTours = !bDrawTours;
         break;
-
     case '3':
         bDrawCurve = !bDrawCurve;
         break;
@@ -322,6 +381,9 @@ void keyPressed (unsigned char key, int x, int y) {
         break;
     case '8':
         bDrawToursBB = !bDrawToursBB;
+        break;
+    case '9':
+		bDrawTourer = !bDrawTourer;
         break;
     case 'w':
         wasd[0] = true;
@@ -341,6 +403,15 @@ void keyPressed (unsigned char key, int x, int y) {
     case 'c':
       addSight();
       break;
+    case 'q':
+		moveTourer[0] = true;
+		break;
+	case 'e':
+		moveTourer[1] = true;
+		break;
+	case 'f':
+		bFirstPerson = !bFirstPerson;
+		break;
     }
 }
 
@@ -358,6 +429,12 @@ void keyReleased (unsigned char key, int x, int y) {
         case 'd':
             wasd[3] = false;
             break;
+        case 'q':
+			moveTourer[0] = false;
+			break;
+		case 'e':
+			moveTourer[1] = false;
+			break;
     }
 }
 
@@ -416,6 +493,7 @@ int main(int argc, char **argv)
     createSightPaths();
 
     printf("everything made\n");
+    
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
     glutInitWindowSize(width, height);
@@ -429,6 +507,7 @@ int main(int argc, char **argv)
     glutMotionFunc(mouseFunc);
     glutPassiveMotionFunc(mouseMoveFunc);
     printInfo();
+    updateMetrics();
     glutMainLoop();
     return 0;
 }
