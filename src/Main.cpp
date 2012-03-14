@@ -168,6 +168,7 @@ void drawTriangles()
 void addSight()
 {
     SightPath2 * sightPath = curSightPath();
+    vector<Vector3> & controlPoints =  activeControlPoints();
     std::cout<<"\n#############################\n"
                  "#                           #\n"
                  "#         ADD SIGHT         #\n"
@@ -182,13 +183,13 @@ void addSight()
     std::cout << "Please enter after which #sight it should be added(int): ";
     int idx;
     std::cin >> idx;
-    if (idx <0 || idx > activeControlPoints().size()-1) {
+    if (idx <0 || idx > controlPoints.size()-1) {
         std::cerr << "Bad Index!" << std::endl;
         return;
     }
     //add!
     sightPath->addSight(Vector3(x,y,z), idx);
-    activeControlPoints = sightPath->controlPoints();
+    controlPoints = sightPath->controlPoints();
     wasd[0] = false;
     wasd[1] = false;
     wasd[2] = false;
@@ -198,6 +199,7 @@ void addSight()
 void removeSight()
 {
     SightPath2 * sightPath = curSightPath();
+    vector<Vector3> & controlPoints =  activeControlPoints();
     std::cout<<"\n#############################\n"
                  "#                           #\n"
                  "#       REMOVE SIGHT        #\n"
@@ -206,14 +208,14 @@ void removeSight()
                  "Please enter idx(int): ";
     int idx;
     std::cin >> idx;
-    if (idx <0 || idx > activeControlPoints().size()-1) {
+    if (idx <0 || idx > controlPoints.size()-1) {
         std::cerr << "Bad Index!" << std::endl;
         return;
     }
     std::cout << "........\nRemoving sight #" << idx << std::endl;
     //remove!
     sightPath->removeSight(idx);
-    activeControlPoints = sightPath->controlPoints();
+    controlPoints = sightPath->controlPoints();
     wasd[0] = false;
     wasd[1] = false;
     wasd[2] = false;
