@@ -17,10 +17,14 @@ public:
                             const Vector3 &_p2,
                             const Vector3 &_p3,
                             int _steps,
-                            float _lineWidth);
+                            float _lineWidth,
+							Vector3 _color);
+                            
     static void renderCurves(const std::vector<Vector3> &_cpts,
                              int _steps,
-							 float _lineWidth);
+							 float _lineWidth,
+							 Vector3 _color);
+							 
     static void renderCtrlPts(const std::vector<Vector3> &_cpts,
 							  float _size);
 	static void renderCtrlPoly(const std::vector<Vector3> &_cpts,
@@ -41,6 +45,15 @@ public:
 						   float _t,
 						   float _dt);
 
+	static float maxCurvature(const Vector3 &_p1,
+					          const Vector3 &_p2,
+							  const Vector3 &_p3,
+							  int _steps,
+							  float _dt);
+							  
+	static float maxCurvature(const std::vector<Vector3> &_cpts,
+							  int _steps,
+							  float _dt);
 						   
 	static float minDistance(const Vector3 &_p1,
 						     const Vector3 &_p2,

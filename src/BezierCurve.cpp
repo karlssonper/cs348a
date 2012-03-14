@@ -58,10 +58,11 @@ void BezierCurve::renderCurve(const Vector3 &_p1,
                               const Vector3 &_p2,
                               const Vector3 &_p3,
                               int _steps,
-							  float _lineWidth) {
+							  float _lineWidth,
+							  Vector3 _color) {
     glLineWidth(_lineWidth);
     glBegin(GL_LINE_STRIP);
-    glColor3f(1,1,1);
+    glColor3f(_color.x, _color.y, _color.z);
     for (int i=0; i<_steps; ++i) {
         float t = (float)i/(float)(_steps-1);
          Vector3 p = BezierCurve::evaluate(_p1, _p2, _p3, t);
@@ -72,12 +73,13 @@ void BezierCurve::renderCurve(const Vector3 &_p1,
 
 void BezierCurve::renderCurves(const std::vector<Vector3> &_cpts,
                                int _steps,
-							   float _lineWidth) {
+							   float _lineWidth,
+							   Vector3 _color) {
     for (int i=0; i<_cpts.size()-2; i=i+2) {
         Vector3 p1 = _cpts.at(i);
         Vector3 p2 = _cpts.at(i+1);
         Vector3 p3 = _cpts.at(i+2);
-        renderCurve(p1, p2, p3, _steps, _lineWidth);
+        renderCurve(p1, p2, p3, _steps, _lineWidth, _color);
     }
 }
 
@@ -226,4 +228,34 @@ float BezierCurve::minDistance(const std::vector<Vector3> &_cpts,
 		}
     }
     return min;							   
+}
+
+float BezierCurve::maxCurvature(const Vector3 &_p1,
+					            const Vector3 &_p2,
+							    const Vector3 &_p3,
+							    int _steps,
+							    float _dt) {
+	float max = 0.f;
+	for (int i=0; i<_steps; ++i) {
+        float t = (float)i/(float)(_steps-1);
+         float temp = curvature(_p1, _p2, _p3, t, _dt);
+         if (temp > max) max = temp;
+     }
+	return max;
+}
+
+float BezierCurve::maxCurvature(const std::vector<Vector3> &_cpts,
+							    int _steps,
+							    float _dt) {
+	float max = 0.f;				   
+	for (int i=0; i<_cpts.size()-2; i=i+2) {
+        Vector3 p1 = _cpts.at(i);
+        Vector3 p2 = _cpts.at(i+1);
+        Vector3 p3 = _cpts.at(i+2);
+        float temp = maxCurvature(p1, p2, p3, _steps, _dt);
+        if (temp > max) {
+			max = temp;
+		}
+    }
+    return max;		
 }

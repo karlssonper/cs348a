@@ -99,7 +99,16 @@ void updateMetrics() {
 	totalLength = BezierCurve::length(controlPoints2, 200);
 	minDistance = BezierCurve::minDistance(controlPoints2, 100, terrain);
 	std::cout << "Total length: " << totalLength << std::endl;
+}
+
+void updateDistance() {
+	minDistance = BezierCurve::minDistance(controlPoints2, 500, terrain);
 	std::cout << "Min distance: " << minDistance << std::endl;
+}
+
+void updateCurvature() {
+	maxCurvature = BezierCurve::maxCurvature(controlPoints2, 10000, 0.0000001);
+	std::cout << "Max curvature: " << maxCurvature << std::endl;
 }
 
 void drawTourer(float _size) {
@@ -257,9 +266,10 @@ void initGL() {
 void drawCurves(bool renderFirst)
 {
     std::vector<Vector3> * controlPoints = renderFirst ? &controlPoints1: &controlPoints2 ;
+    Vector3 color = renderFirst ? Vector3(0.7,0,0.3) : Vector3(1,1,1);
 
   if(bDrawCurve)
-    BezierCurve::renderCurves(*controlPoints,100,3.f);
+    BezierCurve::renderCurves(*controlPoints,100,3.f,color);
   
   if (bDrawControlPoints)
     BezierCurve::renderCtrlPts(*controlPoints, 60);
@@ -368,6 +378,10 @@ void printInfo()
          "  |    Press 'c'   - Add New Sight                        |\n"
          "  |    Press 'r'   - Remove Sight                         |\n"
          "  |    Press 'f'   - Toggle first person mode             |\n"
+		 "  |    Press 'b'   - Calculate total length               |\n"
+		 "  |    Press 'n'   - Calculate min distance               |\n"
+		 "  |    Press 'm'   - Calculate max curvature              |\n"
+		 "  |                                                       |\n"
          "  |    Press '1' - Toggle Terrain                         |\n"
          "  |    Press '2' - Toggle Sights                          |\n"
          "  |    Press '3' - Toggle Sight Path                      |\n"
@@ -449,6 +463,15 @@ void keyPressed (unsigned char key, int x, int y) {
 	case 'l':
 	    render = RENDER_BOTH;
 	    break;
+	case 'b':
+		//updateLength();
+		break;
+	case 'n':
+		updateDistance();
+		break;
+	case 'm':
+		updateCurvature();
+		break;
     }
 }
 
@@ -537,7 +560,6 @@ int main(int argc, char **argv)
     glutMotionFunc(mouseFunc);
     glutPassiveMotionFunc(mouseMoveFunc);
     printInfo();
-    updateMetrics();
     glutMainLoop();
     return 0;
 }
