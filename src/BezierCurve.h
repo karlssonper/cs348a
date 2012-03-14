@@ -3,6 +3,7 @@
 
 #include "MathEngine.h"
 #include <vector>
+#include "terrain.h"
 
 class BezierCurve {
 public:
@@ -37,7 +38,19 @@ public:
 	static float curvature(const Vector3 &_p1,
 						   const Vector3 &_p2,
 						   const Vector3 &_p3,
-						   float _t);
+						   float _t,
+						   float _dt);
+
+						   
+	static float minDistance(const Vector3 &_p1,
+						     const Vector3 &_p2,
+						     const Vector3 &_p3,
+						     int _steps,
+						     const Terrain *_terrain);
+						  
+	static float minDistance(const std::vector<Vector3> &_cpts,
+							 int _steps,
+							 const Terrain *_terrain);
 	
     BezierCurve(Vector3 _p1, Vector3 _p2, Vector3 _p3);
     Vector3 evaluate(float _t);

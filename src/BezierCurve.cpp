@@ -1,5 +1,10 @@
 #include "BezierCurve.h"
 #include <GL/glut.h>
+#include <math.h>
+#include "limits"
+#include "Triangle.h"
+#include "Ray.h"
+#include "IntersectionInfo.h"
 
 BezierCurve::BezierCurve(Vector3 _p1, Vector3 _p2, Vector3 _p3) 
     : p1(_p1), p2(_p2), p3(_p3) {}
@@ -28,7 +33,8 @@ Vector3 BezierCurve::evaluateGlobal(const std::vector<Vector3> &_cpts,
 	int localPolygon = floor(_t / localInterval);
 	
 	// roundoff issues towards the end (just return last possible point)
-	if (2*localPolygon+2 > _cpts.size()-1) {
+	//if (2*localPolygon+2 > _cpts.size()-1) {
+	if (_t >= 1.0f) {
 		Vector3 p1 = _cpts.at(_cpts.size()-3);
 		Vector3 p2 = _cpts.at(_cpts.size()-2);
 		Vector3 p3 = _cpts.at(_cpts.size()-1);
@@ -39,10 +45,13 @@ Vector3 BezierCurve::evaluateGlobal(const std::vector<Vector3> &_cpts,
 	Vector3 p1 = _cpts.at(2*localPolygon);
 	Vector3 p2 = _cpts.at(2*localPolygon+1);
 	Vector3 p3 = _cpts.at(2*localPolygon+2);
+	//std::cout << "We are after ctrl point " << 2*localPolygon << std::endl;
 	
 	// translate the global interval to [0,1] locally and evaluate
 	float tLocal = (_t-localInterval*localPolygon)/localInterval;
-	return evaluate(p1, p2, p3, tLocal);									
+	Vector3 result = evaluate(p1, p2, p3, tLocal);		
+	//std::cout << "At coord " << result.x << " " << result.y << " " << result.z << std::endl;							
+	return result;
 }
 
 void BezierCurve::renderCurve(const Vector3 &_p1,
@@ -137,7 +146,6 @@ float BezierCurve::length(const Vector3 &_p1,
         Vector3 p1 = BezierCurve::evaluate(_p1, _p2, _p3, t1);
         l += (p1-p0).mag();
      }	
-     std::cout << "l = " << l << std::endl;
      return l;
 }
 
@@ -154,9 +162,68 @@ float BezierCurve::length(const std::vector<Vector3> &_cpts,
 }
 
 float BezierCurve::curvature(const Vector3 &_p1,
-						     const Vector3 &_p2,
-						     const Vector3 &_p3,
-						     float _t) {
-								 
-								 
+                       const Vector3 &_p2,
+                       const Vector3 &_p3,
+                       float _t,
+                       float _dt)
+{
+    Vector3 pm = BezierCurve::evaluate(_p1, _p2, _p3, _t-_dt);
+    Vector3 p = BezierCurve::evaluate(_p1, _p2, _p3, _t);
+    Vector3 pp = BezierCurve::evaluate(_p1, _p2, _p3, _t+_dt);
+
+    Vector3 v1 = pm-p;
+    Vector3 v2 = pp-p;
+
+    float s1 = v1.mag();
+    float s2 = v2.mag();
+
+    //this is cos theta
+    float d = v1.dot(v2)/(s1*s2);
+#define PI 3.14159265
+    return (PI - acos(d))/(s1+s2);
+}
+
+float BezierCurve::minDistance(const Vector3 &_p1,
+							   const Vector3 &_p2,
+							   const Vector3 &_p3,
+							   int _steps,
+							   const Terrain *_terrain) {
+	Vector3 minPoint;
+	float min = std::numeric_limits<float>::max();	
+	for (int i=0; i<_steps; ++i) {
+        float t = (float)i/(float)(_steps-1);
+		Vector3 p = evaluate(_p1, _p2, _p3, t);
+		std::vector<Triangle> triangles = _terrain->getTriangles(p,p);
+		Vector3 dir = Vector3(0.f, 0.f, -1.f);
+		dir.normalize();
+		Ray r(p, dir, 0, std::numeric_limits<float>::max());
+		for (int i = 0; i < triangles.size(); ++i) {
+			IntersectionInfo ii = triangles[i].rayIntersect(r);
+			if (ii.hit) {
+				if (ii.t < min) {
+					min = ii.t;
+					minPoint = ii.p;
+				}
+			}
+		}
+    }
+    //std::cout << min << ", " << minPoint.x << " " << minPoint.y << " " << minPoint.z << std::endl;
+    return min;							
+}
+
+float BezierCurve::minDistance(const std::vector<Vector3> &_cpts,
+							   int _steps,
+							   const Terrain *_terrain) {
+	float min = std::numeric_limits<float>::max();					   
+	for (int i=0; i<_cpts.size()-2; i=i+2) {
+        Vector3 p1 = _cpts.at(i);
+        Vector3 p2 = _cpts.at(i+1);
+        Vector3 p3 = _cpts.at(i+2);
+        float temp = minDistance(p1, p2, p3, _steps, _terrain);
+        if (temp < min) {
+			min = temp;
+			//std::cout << "New min after ctl polygon point " << i << std::endl;
+		}
+    }
+    return min;							   
 }
