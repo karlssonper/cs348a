@@ -29,6 +29,7 @@ vector<int> x;
 vector<int> y;
 vector<int> z;
 vector<Vector3> tour;
+vector<Vector3> optimalTour;
 vector<Vector3> tourColors;
 vector<Vector3> controlPoints1;
 vector<Vector3> controlPoints2;
@@ -40,7 +41,7 @@ int mouseX, mouseY;
 
 Terrain *terrain;
 SightPathInterface * sightPath;
-SightPath1 * sightPath1;
+SightPath2 * sightPath1;
 SightPath2 * sightPath2;
 
 float tourT = 0.f;
@@ -67,7 +68,7 @@ bool bDrawControlPoints = true;
 bool bDrawControlPolygon = false;
 bool bDrawControlPolygonExt = false;
 bool bDrawControlPolyFill = false;
-bool bDrawToursBB = false;
+bool bDrawToursBB = true;
 bool bDrawTourer = true;
 bool bFirstPerson = false;
 bool wasd[4] = {false,false,false,false};
@@ -78,6 +79,36 @@ GLuint texID;
 void reshape(int x, int y);
 void drawCurves(bool);
 void display();
+
+SightPath2* curSightPath()
+{
+    switch (render){
+        case RENDER_SIGHTPATH1:
+            return sightPath1;
+            break;
+        case RENDER_SIGHTPATH2:
+            return sightPath2;
+            break;
+        case RENDER_BOTH:
+            return sightPath2;
+            break;
+    }
+}
+
+vector<Vector3> & activeControlPoints()
+{
+    switch (render){
+        case RENDER_SIGHTPATH1:
+            return controlPoints1;
+            break;
+        case RENDER_SIGHTPATH2:
+            return controlPoints2;
+            break;
+        case RENDER_BOTH:
+            return controlPoints2;
+            break;
+    }
+}
 
 void updateControlPoints()
 {
@@ -97,18 +128,18 @@ void updateTourer(const std::vector<Vector3> &_ctrlpts) {
 }
 
 void updateLength() {
-	totalLength = BezierCurve::length(controlPoints2, 200);
-	minDistance = BezierCurve::minDistance(controlPoints2, 100, terrain);
+	totalLength = BezierCurve::length(activeControlPoints(), 200);
+	minDistance = BezierCurve::minDistance(activeControlPoints(), 100, terrain);
 	std::cout << "Total length: " << totalLength << std::endl;
 }
 
 void updateDistance() {
-	minDistance = BezierCurve::minDistance(controlPoints2, 500, terrain);
+	minDistance = BezierCurve::minDistance(activeControlPoints(), 500, terrain);
 	std::cout << "Min distance: " << minDistance << std::endl;
 }
 
 void updateCurvature() {
-	maxCurvature = BezierCurve::maxCurvature(controlPoints2, 1000, 0.001);
+	maxCurvature = BezierCurve::maxCurvature(activeControlPoints(), 1000, 0.001);
 	std::cout << "Max curvature: " << maxCurvature << std::endl;
 }
 
@@ -137,6 +168,7 @@ void drawTriangles()
 
 void addSight()
 {
+    SightPath2 * sightPath = curSightPath();
     std::cout<<"\n#############################\n"
                  "#                           #\n"
                  "#         ADD SIGHT         #\n"
@@ -151,13 +183,13 @@ void addSight()
     std::cout << "Please enter after which #sight it should be added(int): ";
     int idx;
     std::cin >> idx;
-    if (idx <0 || idx > controlPoints2.size()-1) {
+    if (idx <0 || idx > activeControlPoints().size()-1) {
         std::cerr << "Bad Index!" << std::endl;
         return;
     }
     //add!
-    sightPath2->addSight(Vector3(x,y,z), idx);
-    controlPoints2 = sightPath2->controlPoints();
+    sightPath->addSight(Vector3(x,y,z), idx);
+    controlPoints2 = sightPath->controlPoints();
     wasd[0] = false;
     wasd[1] = false;
     wasd[2] = false;
@@ -166,6 +198,7 @@ void addSight()
 
 void removeSight()
 {
+    SightPath2 * sightPath = curSightPath();
     std::cout<<"\n#############################\n"
                  "#                           #\n"
                  "#       REMOVE SIGHT        #\n"
@@ -174,14 +207,14 @@ void removeSight()
                  "Please enter idx(int): ";
     int idx;
     std::cin >> idx;
-    if (idx <0 || idx > controlPoints2.size()-1) {
+    if (idx <0 || idx > activeControlPoints().size()-1) {
         std::cerr << "Bad Index!" << std::endl;
         return;
     }
     std::cout << "........\nRemoving sight #" << idx << std::endl;
     //remove!
-    sightPath2->removeSight(idx);
-    controlPoints2 = sightPath2->controlPoints();
+    sightPath->removeSight(idx);
+    controlPoints2 = sightPath->controlPoints();
     wasd[0] = false;
     wasd[1] = false;
     wasd[2] = false;
@@ -229,7 +262,22 @@ void drawMinimap()
   //  camera->lookThrough();
   float saved = lineWidth;
   glDisable(GL_LIGHTING);
-  BezierCurve::renderCurves(controlPoints2,100,1.0f,Vector3(0.9,0.15,0.15));
+  switch (render){
+      case RENDER_SIGHTPATH1:
+          BezierCurve::renderCurves(controlPoints1,100,1.0f,
+                  Vector3(0.15,0.15,0.9));
+          break;
+      case RENDER_SIGHTPATH2:
+          BezierCurve::renderCurves(controlPoints2,100,1.0f,
+                  Vector3(0.9,0.15,0.15));
+          break;
+      case RENDER_BOTH:
+          BezierCurve::renderCurves(controlPoints1,100,1.0f,
+                  Vector3(0.15,0.15,0.9));
+          BezierCurve::renderCurves(controlPoints2,100,1.0f,
+                  Vector3(0.9,0.15,0.15));
+          break;
+  }
   drawTourer(1000.f);
   glEnable(GL_LIGHTING);
   drawTriangles();
@@ -260,11 +308,12 @@ void parseTour(string filename,
     infile.close();  
 }
 
-void loadTexture()
+void loadTexture(const char * texture)
 {
+    std::cout << "Loading texture: texture.data" << std::endl;
     int c;
     ifstream infile;
-    infile.open("../src/texture.data");
+    infile.open(texture);
     std::vector<unsigned char> pixelData;
     if (infile.is_open()) {
         while (!infile.eof()) {
@@ -281,9 +330,11 @@ void loadTexture()
 
     infile.close();
 
+    int res = sqrt(pixelData.size()/3);
+
     glGenTextures(1, &texID);
     glBindTexture(GL_TEXTURE_2D, texID);
-    glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA, 512, 512, 0, GL_RGBA,
+    glTexImage2D(GL_TEXTURE_2D,0,GL_RGB, res, res, 0, GL_RGB,
             GL_UNSIGNED_BYTE,&pixelData[0]);
     //glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
             //GL_LINEAR_MIPMAP_NEAREST );
@@ -293,10 +344,11 @@ void loadTexture()
     glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
 
     glBindTexture(GL_TEXTURE_2D, 0);
+    std::cout << "Done loading texture." << std::endl;
 
 }
 
-void initGL() {
+void initGL(const char * texture) {
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
     //glClearColor(0.2f, 0.2f, 0.2f, 1.f);
@@ -309,7 +361,7 @@ void initGL() {
     //glOrtho(-20000, 20000.0, -20000, 20000.0, -30.0, 2000);
 
     glMatrixMode(GL_MODELVIEW);
-    loadTexture();
+    loadTexture(texture);
     camera = new Camera(0.0f, 0.0f, 2000.f, 0.f, 0.f);
     camera->posX = 7553.189941;
     camera->posY = -6245.730469;
@@ -321,7 +373,7 @@ void initGL() {
 void drawCurves(bool renderFirst)
 {
     std::vector<Vector3> * controlPoints = renderFirst ? &controlPoints1: &controlPoints2 ;
-    Vector3 color = renderFirst ? Vector3(0.7,0,0.3) : Vector3(0.9,0.15,0.15);
+    Vector3 color = renderFirst ? Vector3(0.15,0.15,0.9) : Vector3(0.9,0.15,0.15);
 
   if(bDrawCurve)
     BezierCurve::renderCurves(*controlPoints,100,lineWidth,color);
@@ -390,7 +442,7 @@ void display() {
     if (bDrawTours)
         drawTour(&tour);
     
-    updateTourer(controlPoints2);
+    updateTourer(activeControlPoints());
 
 
     if(bDrawToursBB)
@@ -446,6 +498,22 @@ void printInfo()
          "  |    Mouse       - Rotate Camera view                   |\n"
          "  |    Press 'w/s' - Walk forward/backwards               |\n"
          "  |    Press 'a/d' - Strafe left/right                    |\n"
+         "  |    Press 'q/e' - Move tour object                     |\n"
+         "  |                                                       |\n"
+         "  |    Press '1' - Display original path                  |\n"
+         "  |    Press '2' - Display optimal path                   |\n"
+         "  |    Press '3' - Display both paths                     |\n"
+         "  |                                                       |\n"
+         "  |    Press '4' - Toggle Path                            |\n"
+         "  |    Press '5' - Toggle Control Points                  |\n"
+         "  |    Press '6' - Toggle Control Polygon                 |\n"
+         "  |    Press '7' - Toggle Control Polygon Extended        |\n"
+         "  |    Press '8' - Toggle Control Polygon Filled          |\n"
+         "  |    Press '9' - Toggle Sights Bounding Box             |\n"
+         "  |    Press 'x' - Toggle Tourer Box                      |\n"
+         "  |    Press 't' - Toggle Terrain                         |\n"
+         "  |    Press 'z' - Toggle Sights                          |\n"
+         "  |                                                       |\n"
          "  |    Press 'c'   - Add New Sight                        |\n"
          "  |    Press 'r'   - Remove Sight                         |\n"
          "  |    Press 'f'   - Toggle first person mode             |\n"
@@ -454,16 +522,6 @@ void printInfo()
 		 "  |    Press 'n'   - Calculate min distance               |\n"
 		 "  |    Press 'm'   - Calculate max curvature              |\n"
 		 "  |                                                       |\n"
-         "  |    Press '1' - Toggle Terrain                         |\n"
-         "  |    Press '2' - Toggle Sights                          |\n"
-         "  |    Press '3' - Toggle Sight Path                      |\n"
-         "  |    Press '4' - Toggle Control Points                  |\n"
-         "  |    Press '5' - Toggle Control Polygon                 |\n"
-         "  |    Press '6' - Toggle Control Polygon Extended        |\n"
-         "  |    Press '7' - Toggle Control Polygon Filled          |\n"
-         "  |    Press '8' - Toggle Sights Bounding Box             |\n"
-         "  |    Press '9' - Toggle Tourer Box                      |\n"
-         "  |                                                       |\n"
          "  |    Press 'esc' - Quit                                 |\n"
          "  ---------------------------------------------------------"
         << std::endl;
@@ -472,31 +530,31 @@ void printInfo()
 
 void keyPressed (unsigned char key, int x, int y) {  
     switch (key) {
-    case '1':
+    case 't':
         bDrawTerrain = !bDrawTerrain;
         break;
-    case '2':
+    case 'z':
         bDrawTours = !bDrawTours;
         break;
-    case '3':
+    case '4':
         bDrawCurve = !bDrawCurve;
         break;
-    case '4':
+    case '5':
         bDrawControlPoints = !bDrawControlPoints;
         break;
-    case '5':
+    case '6':
         bDrawControlPolygon = !bDrawControlPolygon;
         break;
-    case '6':
+    case '7':
         bDrawControlPolygonExt = !bDrawControlPolygonExt;
         break;
-    case '7':
+    case '8':
         bDrawControlPolyFill = !bDrawControlPolyFill;
         break;
-    case '8':
+    case '9':
         bDrawToursBB = !bDrawToursBB;
         break;
-    case '9':
+    case 'x':
 		bDrawTourer = !bDrawTourer;
         break;
     case 'w':
@@ -526,13 +584,13 @@ void keyPressed (unsigned char key, int x, int y) {
 	case 'f':
 		bFirstPerson = !bFirstPerson;
 		break;
-	case 'j':
+	case '2':
 	    render = RENDER_SIGHTPATH1;
 	    break;
-	case 'k':
+	case '1':
 	    render = RENDER_SIGHTPATH2;
 	    break;
-	case 'l':
+	case '3':
 	    render = RENDER_BOTH;
 	    break;
 	case 'b':
@@ -591,9 +649,8 @@ void mouseMoveFunc(int x,int y)
 
 void createSightPaths()
 {
-    sightPath1 = new SightPath1(terrain, tour);
-    sightPath1->createConstraintTangents();
-    sightPath1->createControlPoints();
+    sightPath1 = new SightPath2(terrain, optimalTour);
+    sightPath1->createPath();
 
     sightPath2 = new SightPath2(terrain, tour);
     sightPath2->createPath();
@@ -610,10 +667,12 @@ int main(int argc, char **argv)
     delaunay1(g);
     copyGraphToListOfTriangles(g, &tl);
 */
+    const char * texturename =  argc == 2 ? argv[1] : "../src/texture.data";
+    std::cerr << texturename << std::endl;
     srand(0);
     parseTour("../data/hw4.tour", &tour);
-    cout << "Parsed tour, found " << tour.size()/3 << " sights" << endl;
-    //tour = optimalSightPath(tour);
+    cout << "Parsed tour, found " << tour.size() << " sights" << endl;
+    optimalTour = optimalSightPath(tour);
 
     terrain = new Terrain("../src/sample.mesh3","../src/sample.triangles3");
     printf("terrain loaded\n");
@@ -627,7 +686,7 @@ int main(int argc, char **argv)
     glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
     glutInitWindowSize(width, height);
     glutCreateWindow("cs348a project");
-    initGL();
+    initGL(texturename);
     glutReshapeFunc(reshape);
     glutDisplayFunc(display);
     glutIdleFunc(display);
