@@ -584,9 +584,11 @@ void keyPressed (unsigned char key, int x, int y) {
 		bFirstPerson = !bFirstPerson;
 		break;
 	case '2':
+	    std::cout << "Displaying optimal path" << std::endl;
 	    render = RENDER_SIGHTPATH1;
 	    break;
 	case '1':
+	    std::cout << "Displaying original path" << std::endl;
 	    render = RENDER_SIGHTPATH2;
 	    break;
 	case '3':
