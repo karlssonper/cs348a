@@ -27,16 +27,19 @@ bool intersectionBezier(const Vector3 & p0, const Vector3 & p1, const Vector3 &p
 class SightPathInterface
 {
  public:
+  SightPathInterface(){};
+  virtual ~SightPathInterface(){};
   virtual const std::vector<Vector3> controlPoints()=0;
   virtual void removeSight(int index)=0;
+  virtual void addSight(Vector3 pos, int prevSightIdx) = 0;
 };
   
 
-class SightPath
+class SightPath1
 : public SightPathInterface
 {
 public:
-    SightPath(const Terrain * terrain,
+    SightPath1(const Terrain * terrain,
               const std::vector<Vector3> &sights);
 
     void createConstraintTangents();
@@ -44,6 +47,7 @@ public:
     void removeSight(int index);
     const std::vector<Vector3> controlPoints() {return controlPoints_;};
     std::vector<Vector3> sights() const;
+    void addSight(Vector3 pos, int prevSightIdx);
 private:
     struct Sight {
         Vector3 pos;
@@ -70,7 +74,7 @@ public:
     void removeSight(int index);
     int numSights() {return sights_.size();}
     int moveMidpoint(int index, Vector3 diff);
-
+    void addSight(Vector3 pos, int prevSightIdx);
     const std::vector<Vector3> controlPoints();
 private:
     void createMidpoints();
