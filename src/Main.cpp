@@ -73,6 +73,8 @@ bool bDrawTourer = true;
 bool bFirstPerson = false;
 bool wasd[4] = {false,false,false,false};
 bool moveTourer [2] = { false, false };
+float tourFactor = 1.f;
+
 
 GLuint texID;
 
@@ -399,8 +401,10 @@ void display() {
     if (wasd[1]) camera->walkBackwards(20.f*scale);
     if (wasd[2]) camera->strafeLeft(10.f*scale);
     if (wasd[3]) camera->strafeRight(10.f*scale);
-    if (moveTourer[0]) stepTourer(tourSpeed);
-    if (moveTourer[1]) stepTourer(-tourSpeed);
+    if (moveTourer[0]) stepTourer(tourSpeed*tourFactor);
+    if (moveTourer[1]) stepTourer(-tourSpeed*tourFactor);
+
+
 
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -500,6 +504,7 @@ void printInfo()
          "  |    Press 'w/s' - Walk forward/backwards               |\n"
          "  |    Press 'a/d' - Strafe left/right                    |\n"
          "  |    Press 'q/e' - Move tour object                     |\n"
+         "  |    Press 'k/l' - Decrease/Increase tour speed         |\n"
          "  |                                                       |\n"
          "  |    Press '1' - Display original path                  |\n"
          "  |    Press '2' - Display optimal path                   |\n"
@@ -531,6 +536,14 @@ void printInfo()
 
 void keyPressed (unsigned char key, int x, int y) {  
     switch (key) {
+    case 'k' :
+        tourFactor /= 2.f;
+        std::cout << "New tour speed: " << tourFactor << std::endl;
+        break;
+    case 'l' :
+        tourFactor *= 2.f;
+        std::cout << "New tour speed: " << tourFactor << std::endl;
+        break;
     case 't':
         bDrawTerrain = !bDrawTerrain;
         break;
