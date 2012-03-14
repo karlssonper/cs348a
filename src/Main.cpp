@@ -120,7 +120,7 @@ void updateNrCurves() {
 void drawTourer(float _size) {
 	glPushMatrix();
 	glTranslatef(tourPos.x, tourPos.y, tourPos.z);
-	glColor3f(1.f, 0.f, 1.f);
+	glColor3f(1.0f, 1.0f, 0.f);
 	glutSolidCube(_size);
 	glPopMatrix();
 }
@@ -220,7 +220,7 @@ void drawMinimap()
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   glViewport(0, 0, miniWidth, miniHeight);
-  glOrtho(-18000.f, 18000.f, -18000.f, 18000.f, 10.0f, 10000.f);
+  glOrtho(-20000.f, 20000.f, -19000.f, 19000.f, 10.0f, 10000.f);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   gluLookAt(0.0, 0.0, 5000.0,
@@ -229,7 +229,7 @@ void drawMinimap()
   //  camera->lookThrough();
   float saved = lineWidth;
   glDisable(GL_LIGHTING);
-  BezierCurve::renderCurves(controlPoints2,100,1.5f,Vector3(1.f,1.f,1.f));
+  BezierCurve::renderCurves(controlPoints2,100,1.0f,Vector3(0.9,0.15,0.15));
   drawTourer(1000.f);
   glEnable(GL_LIGHTING);
   drawTriangles();
@@ -321,7 +321,7 @@ void initGL() {
 void drawCurves(bool renderFirst)
 {
     std::vector<Vector3> * controlPoints = renderFirst ? &controlPoints1: &controlPoints2 ;
-    Vector3 color = renderFirst ? Vector3(0.7,0,0.3) : Vector3(1,1,1);
+    Vector3 color = renderFirst ? Vector3(0.7,0,0.3) : Vector3(0.9,0.15,0.15);
 
   if(bDrawCurve)
     BezierCurve::renderCurves(*controlPoints,100,lineWidth,color);

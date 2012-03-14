@@ -64,7 +64,7 @@ std::vector<Vector3> optimalSightPath(const std::vector<Vector3>& _cp)
     for (int j = 0; j < t.size(); ++j) {
         if (t[j].first < min) {
             min = t[j].first;
-            minIdx = j;
+        minIdx = j;
         }
     }
 
